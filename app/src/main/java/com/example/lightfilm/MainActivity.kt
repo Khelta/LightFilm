@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.ui.theme.LightFilmTheme
 import kotlin.math.log2
+import androidx.compose.runtime.remember
 
 
 class MainActivity : ComponentActivity() {
@@ -126,26 +128,54 @@ fun PictureList(listItems: List<String> = listOf("a", "b", "c")) {
 
 @Composable
 fun Measurement(modifier: Modifier = Modifier) {
-    Column() {
-        Row() {
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = modifier.padding(5.dp),
-                shape = RoundedCornerShape(15)
-            ) {
-                Column(modifier = Modifier.padding(15.dp)) {
-                    Text("Iso")
-                    Text("200")
+    var showIsoOverlay by remember { mutableStateOf(false) }
+    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(18) }
+    var showNDOverlay by remember { mutableStateOf(false) }
+    var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    fun handleIsoValueSelected(value: Int) {
+        selectedIsoIndex = value
+        showIsoOverlay = false
+    }
+
+    fun handleNDValueSelected(value: Int) {
+        selectedNDIndex = value
+        showNDOverlay = false
+    }
+
+    Box() {
+        if (showIsoOverlay) {
+            DropdownSelection(selectedValue = selectedIsoIndex,
+                onClickSelect = ::handleIsoValueSelected,
+                onClickCancel = { showIsoOverlay = false })
+        }
+        if (showNDOverlay) {
+            DropdownSelection(isIsoSelection = false,
+                selectedValue = selectedNDIndex,
+                onClickSelect = ::handleNDValueSelected,
+                onClickCancel = { showNDOverlay = false })
+        }
+        Column() {
+            Row() {
+                Surface(color = MaterialTheme.colorScheme.primary,
+                    modifier = modifier.padding(5.dp),
+                    shape = RoundedCornerShape(15),
+                    onClick = { showIsoOverlay = true }) {
+                    Column(modifier = Modifier.padding(15.dp)) {
+                        Text("ISO")
+                        Text(isoSensitivityOptions[selectedIsoIndex].toString())
+                    }
                 }
-            }
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                modifier = modifier.padding(5.dp),
-                shape = RoundedCornerShape(15)
-            ) {
-                Column(modifier = Modifier.padding(15.dp)) {
-                    Text("ND")
-                    Text("None")
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = modifier.padding(5.dp),
+                    shape = RoundedCornerShape(15),
+                    onClick = { showNDOverlay = true }
+                ) {
+                    Column(modifier = Modifier.padding(15.dp)) {
+                        Text("ND")
+                        Text(if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString())
+                    }
                 }
             }
         }
@@ -171,10 +201,13 @@ fun PicturePreview() {
 
 @Composable
 fun DropdownSelection(
-    isIsoSelection: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isIsoSelection: Boolean = true,
+    selectedValue: Int = if (isIsoSelection) 18 else 0,
+    onClickSelect: (Int) -> Unit = {},
+    onClickCancel: () -> Unit = {}
 ) {
-    var selected by rememberSaveable { mutableIntStateOf(if (isIsoSelection) 18 else 0) }
+    var selected by rememberSaveable { mutableIntStateOf(selectedValue) }
     val selectionItems = if (isIsoSelection) isoSensitivityOptions else ndSensitivityOptions
     Surface(
         modifier = modifier,
@@ -182,8 +215,7 @@ fun DropdownSelection(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier.padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(if (isIsoSelection) "ISO" else "ND", textAlign = TextAlign.Center)
             Text(if (isIsoSelection) "Film sensitivity" else "Neutral density filter factor")
@@ -197,19 +229,18 @@ fun DropdownSelection(
                 selectionItems.forEachIndexed { index, value ->
                     // Calculates the evValues for ISO and ND values
                     val evValue =
-                        if (isIsoSelection) log2(value.toDouble() / selectionItems[selected]) else
-                            if (selectionItems[selected] == 0 && value == 0) 0.0 else
-                                if (selectionItems[selected] == 0) 0  - log2(value.toDouble()) else
-                                    if (value == 0) log2(selectionItems[selected].toDouble()) else
-                                        log2(selectionItems[selected].toDouble()) - log2(value.toDouble())
+                        if (isIsoSelection) log2(value.toDouble() / selectionItems[selected]) else if (selectionItems[selected] == 0 && value == 0) 0.0 else if (selectionItems[selected] == 0) 0 - log2(
+                            value.toDouble()
+                        ) else if (value == 0) log2(selectionItems[selected].toDouble()) else log2(
+                            selectionItems[selected].toDouble()
+                        ) - log2(value.toDouble())
                     val sign =
                         if (isIsoSelection) if (evValue >= 0) "+" else "" else if (evValue >= 0) "+" else ""
 
                     DropdownItem(
                         value = if (value == 0) "None" else value.toString(),
                         helperValue = if (evValue == 0.0) "" else String.format(
-                            "$sign%.1f EV",
-                            evValue
+                            "$sign%.1f EV", evValue
                         ),
                         onClick = { selected = index },
                         selected = if (selected == index) true else false
@@ -219,10 +250,10 @@ fun DropdownSelection(
             HorizontalDivider()
             Row() {
                 Surface(modifier = Modifier.weight(1F)) { }
-                TextButton(onClick = {}) {
+                TextButton(onClick = onClickCancel) {
                     Text("Cancel")
                 }
-                TextButton(onClick = {}) {
+                TextButton(onClick = { onClickSelect(selected) }) {
                     Text("Select")
                 }
             }
