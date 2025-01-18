@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,12 +19,22 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,29 +64,85 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
     var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
     var selectedPicture by rememberSaveable { mutableIntStateOf(value = -1) }
 
-    Surface(modifier) {
-        if (showMeasurement) {
-            Measurement()
-        } else {
+    fun handleFilmClick(filmId: Int) {
+        selectedFilm = filmId
+    }
+
+    fun handlePictureClick(pictureId: Int) {
+        selectedPicture = pictureId
+    }
+
+    Scaffold(topBar = {
+        TopAppBar(colors = topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.primary,
+        ), title = {
             if (selectedFilm == -1) {
-                FilmList()
+                Text("LightFilm")
+            } else if (selectedPicture == -1) {
+                Text("Film selected - $selectedFilm")
+            } else {
+                Text("Picture selected - $selectedPicture")
             }
 
+        }, navigationIcon = {
+            if (selectedFilm != -1) {
+                IconButton(onClick = {
+                    if (selectedPicture != -1) {
+                        selectedPicture = -1
+                    } else {
+                        selectedFilm = -1
+                    }
+                }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = ""
+                    )
+                }
+            }
+
+        })
+    }, floatingActionButton = {
+        if (selectedPicture == -1) {
+            FloatingActionButton(onClick = { }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+        }
+    }) { innerPadding ->
+        Surface(modifier = Modifier.padding(innerPadding)) {
+            if (showMeasurement) {
+                Measurement()
+            } else {
+                if (selectedFilm == -1) {
+                    FilmList(onFilmClick = ::handleFilmClick)
+                } else if (selectedPicture == -1) {
+                    PictureList(onPictureClick = ::handlePictureClick)
+                } else {
+                    PictureDetails()
+                }
+
+            }
         }
     }
+
 }
 
 @Composable
-fun Film(modifier: Modifier = Modifier, filmTitle: String = "Example", id: Int = -1) {
-    Surface(
-        color = MaterialTheme.colorScheme.primary, modifier = Modifier
-    ) {
+fun Film(
+    modifier: Modifier = Modifier,
+    filmTitle: String = "Example",
+    id: Int = -1,
+    onFilmClick: (Int) -> Unit = {}
+) {
+    Surface(color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.clickable { onFilmClick(id) }) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -91,23 +158,24 @@ fun Film(modifier: Modifier = Modifier, filmTitle: String = "Example", id: Int =
 }
 
 @Composable
-fun FilmList(listItems: List<String> = listOf("a", "b", "c")) {
+fun FilmList(listItems: List<String> = listOf("a", "b", "c"), onFilmClick: (Int) -> Unit = {}) {
     LazyColumn() {
         itemsIndexed(listItems) { index, a ->
-            Film(filmTitle = a, id = index + 1)
+            Film(filmTitle = a, id = index + 1, onFilmClick = onFilmClick)
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 @Composable
-fun Picture(modifier: Modifier = Modifier) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.primary)
-    ) {
+fun Picture(
+    modifier: Modifier = Modifier, pictureId: Int = -1, onPictureClick: (Int) -> Unit = {}
+) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)
+        .background(MaterialTheme.colorScheme.primary)
+        .clickable { onPictureClick(pictureId) }) {
         // Titel
         Text(
             text = "filmTitle",
@@ -120,10 +188,20 @@ fun Picture(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun PictureList(listItems: List<String> = listOf("a", "b", "c")) {
+fun PictureList(
+    listItems: List<String> = listOf("a", "b", "c"), onPictureClick: (Int) -> Unit = {}
+) {
     LazyColumn() {
-        items(listItems) { _ -> Picture() }
+        itemsIndexed(listItems) { index, a ->
+            Picture(pictureId = index + 1, onPictureClick = onPictureClick)
+            HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+        }
     }
+}
+
+@Composable
+fun PictureDetails() {
+    Text("#TODO")
 }
 
 @Composable
@@ -132,6 +210,8 @@ fun Measurement(modifier: Modifier = Modifier) {
     var selectedIsoIndex by rememberSaveable { mutableIntStateOf(18) }
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    var ev = 0
 
     fun handleIsoValueSelected(value: Int) {
         selectedIsoIndex = value
@@ -166,12 +246,10 @@ fun Measurement(modifier: Modifier = Modifier) {
                         Text(isoSensitivityOptions[selectedIsoIndex].toString())
                     }
                 }
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
+                Surface(color = MaterialTheme.colorScheme.primary,
                     modifier = modifier.padding(5.dp),
                     shape = RoundedCornerShape(15),
-                    onClick = { showNDOverlay = true }
-                ) {
+                    onClick = { showNDOverlay = true }) {
                     Column(modifier = Modifier.padding(15.dp)) {
                         Text("ND")
                         Text(if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString())
@@ -297,7 +375,7 @@ fun DropdownPreview() {
 }
 
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, heightDp = 500, widthDp = 300)
 @Composable
 fun MyAppPreview() {
     LightFilmTheme {
