@@ -70,13 +70,31 @@ fun MyApp(modifier: Modifier = Modifier) {
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
     var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
     var selectedPicture by rememberSaveable { mutableIntStateOf(value = -1) }
+    var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
     fun handleFilmClick(filmId: Int) {
         selectedFilm = filmId
+        activeScene = Scene.PICTURELIST
     }
 
     fun handlePictureClick(pictureId: Int) {
         selectedPicture = pictureId
+        activeScene = Scene.PICTUREDETAILS
+    }
+
+    fun handleArrowBackClick(){
+        if (activeScene == Scene.MEASUREMENTS) {
+            showMeasurement = false
+            activeScene = Scene.PICTURELIST
+        } else if (activeScene == Scene.FILMLIST) {
+
+        } else if (activeScene == Scene.PICTURELIST) {
+            selectedFilm = -1
+            activeScene = Scene.FILMLIST
+        } else if (activeScene == Scene.PICTUREDETAILS) {
+            selectedPicture = -1
+            activeScene = Scene.PICTURELIST
+        }
     }
 
     Scaffold(topBar = {
@@ -84,23 +102,19 @@ fun MyApp(modifier: Modifier = Modifier) {
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
-            if (selectedFilm == -1) {
+            if (activeScene == Scene.MEASUREMENTS) {
+
+            } else if (activeScene == Scene.FILMLIST) {
                 Text("LightFilm")
-            } else if (selectedPicture == -1) {
+            } else if (activeScene == Scene.PICTURELIST) {
                 Text("Film selected - $selectedFilm")
-            } else {
+            } else if (activeScene == Scene.PICTUREDETAILS) {
                 Text("Picture selected - $selectedPicture")
             }
 
         }, navigationIcon = {
             if (selectedFilm != -1) {
-                IconButton(onClick = {
-                    if (selectedPicture != -1) {
-                        selectedPicture = -1
-                    } else {
-                        selectedFilm = -1
-                    }
-                }) {
+                IconButton(onClick = ::handleArrowBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = ""
@@ -111,7 +125,12 @@ fun MyApp(modifier: Modifier = Modifier) {
         })
     }, floatingActionButton = {
         if (selectedPicture == -1) {
-            FloatingActionButton(onClick = { }) {
+            FloatingActionButton(onClick = {
+                if (selectedFilm != -1) {
+                    showMeasurement = true
+                    activeScene = Scene.MEASUREMENTS
+                }
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
         }
@@ -141,7 +160,8 @@ fun Film(
     id: Int = -1,
     onFilmClick: (Int) -> Unit = {}
 ) {
-    Surface(color = MaterialTheme.colorScheme.primary,
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.clickable { onFilmClick(id) }) {
         Column(
             modifier = Modifier
