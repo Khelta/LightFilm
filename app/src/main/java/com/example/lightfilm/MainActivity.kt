@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,7 +48,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.ui.theme.LightFilmTheme
 import kotlin.math.log2
-import androidx.compose.runtime.remember
 
 
 class MainActivity : ComponentActivity() {
@@ -82,18 +81,30 @@ fun MyApp(modifier: Modifier = Modifier) {
         activeScene = Scene.PICTUREDETAILS
     }
 
-    fun handleArrowBackClick(){
-        if (activeScene == Scene.MEASUREMENTS) {
-            showMeasurement = false
-            activeScene = Scene.PICTURELIST
-        } else if (activeScene == Scene.FILMLIST) {
+    fun handleArrowBackClick() {
+        when (activeScene) {
+            Scene.MEASUREMENTS -> {
+                showMeasurement = false
+                activeScene = Scene.PICTURELIST
+            }
 
-        } else if (activeScene == Scene.PICTURELIST) {
-            selectedFilm = -1
-            activeScene = Scene.FILMLIST
-        } else if (activeScene == Scene.PICTUREDETAILS) {
-            selectedPicture = -1
-            activeScene = Scene.PICTURELIST
+            Scene.FILMLIST -> {
+
+            }
+
+            Scene.FILMCREATION -> {
+                activeScene = Scene.FILMLIST
+            }
+
+            Scene.PICTURELIST -> {
+                selectedFilm = -1
+                activeScene = Scene.FILMLIST
+            }
+
+            Scene.PICTUREDETAILS -> {
+                selectedPicture = -1
+                activeScene = Scene.PICTURELIST
+            }
         }
     }
 
@@ -102,18 +113,26 @@ fun MyApp(modifier: Modifier = Modifier) {
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
-            if (activeScene == Scene.MEASUREMENTS) {
+            when (activeScene) {
+                Scene.FILMLIST -> {
+                    Text("LightFilm")
+                }
 
-            } else if (activeScene == Scene.FILMLIST) {
-                Text("LightFilm")
-            } else if (activeScene == Scene.PICTURELIST) {
-                Text("Film selected - $selectedFilm")
-            } else if (activeScene == Scene.PICTUREDETAILS) {
-                Text("Picture selected - $selectedPicture")
+                Scene.PICTURELIST -> {
+                    Text("Film selected - $selectedFilm")
+                }
+
+                Scene.PICTUREDETAILS -> {
+                    Text("Picture selected - $selectedPicture")
+                }
+
+                else -> {
+
+                }
             }
 
         }, navigationIcon = {
-            if (selectedFilm != -1) {
+            if (activeScene != Scene.FILMLIST) {
                 IconButton(onClick = ::handleArrowBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -124,11 +143,13 @@ fun MyApp(modifier: Modifier = Modifier) {
 
         })
     }, floatingActionButton = {
-        if (selectedPicture == -1) {
+        if (activeScene == Scene.FILMLIST || activeScene == Scene.PICTURELIST) {
             FloatingActionButton(onClick = {
-                if (selectedFilm != -1) {
+                if (activeScene == Scene.PICTURELIST) {
                     showMeasurement = true
                     activeScene = Scene.MEASUREMENTS
+                } else if (activeScene == Scene.FILMLIST) {
+                    activeScene = Scene.FILMCREATION
                 }
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
@@ -136,22 +157,21 @@ fun MyApp(modifier: Modifier = Modifier) {
         }
     }) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
-            if (showMeasurement) {
-                Measurement()
-            } else {
-                if (selectedFilm == -1) {
-                    FilmList(onFilmClick = ::handleFilmClick)
-                } else if (selectedPicture == -1) {
-                    PictureList(onPictureClick = ::handlePictureClick)
-                } else {
-                    PictureDetails()
-                }
+            when (activeScene) {
+                Scene.MEASUREMENTS -> Measurement()
 
+                Scene.FILMLIST -> FilmList(onFilmClick = ::handleFilmClick)
+
+                Scene.PICTURELIST -> PictureList(onPictureClick = ::handlePictureClick)
+
+                Scene.PICTUREDETAILS -> PictureDetails()
+
+                Scene.FILMCREATION -> FilmCreation()
             }
         }
     }
-
 }
+
 
 @Composable
 fun Film(
@@ -160,8 +180,7 @@ fun Film(
     id: Int = -1,
     onFilmClick: (Int) -> Unit = {}
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.primary,
+    Surface(color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.clickable { onFilmClick(id) }) {
         Column(
             modifier = Modifier
@@ -179,12 +198,17 @@ fun Film(
 
 @Composable
 fun FilmList(listItems: List<String> = listOf("a", "b", "c"), onFilmClick: (Int) -> Unit = {}) {
-    LazyColumn() {
+    LazyColumn {
         itemsIndexed(listItems) { index, a ->
             Film(filmTitle = a, id = index + 1, onFilmClick = onFilmClick)
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         }
     }
+}
+
+@Composable
+fun FilmCreation(modifier: Modifier = Modifier) {
+    Text("Hello FilmCreation")
 }
 
 @Composable
@@ -211,7 +235,7 @@ fun Picture(
 fun PictureList(
     listItems: List<String> = listOf("a", "b", "c"), onPictureClick: (Int) -> Unit = {}
 ) {
-    LazyColumn() {
+    LazyColumn {
         itemsIndexed(listItems) { index, a ->
             Picture(pictureId = index + 1, onPictureClick = onPictureClick)
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
@@ -243,7 +267,7 @@ fun Measurement(modifier: Modifier = Modifier) {
         showNDOverlay = false
     }
 
-    Box() {
+    Box {
         if (showIsoOverlay) {
             DropdownSelection(selectedValue = selectedIsoIndex,
                 onClickSelect = ::handleIsoValueSelected,
@@ -255,8 +279,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                 onClickSelect = ::handleNDValueSelected,
                 onClickCancel = { showNDOverlay = false })
         }
-        Column() {
-            Row() {
+        Column {
+            Row {
                 Surface(color = MaterialTheme.colorScheme.primary,
                     modifier = modifier.padding(5.dp),
                     shape = RoundedCornerShape(15),
@@ -341,12 +365,12 @@ fun DropdownSelection(
                             "$sign%.1f EV", evValue
                         ),
                         onClick = { selected = index },
-                        selected = if (selected == index) true else false
+                        selected = selected == index
                     )
                 }
             }
             HorizontalDivider()
-            Row() {
+            Row {
                 Surface(modifier = Modifier.weight(1F)) { }
                 TextButton(onClick = onClickCancel) {
                     Text("Cancel")
