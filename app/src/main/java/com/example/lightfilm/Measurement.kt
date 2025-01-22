@@ -1,15 +1,21 @@
 package com.example.lightfilm
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
@@ -24,6 +30,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,26 +70,79 @@ fun Measurement(modifier: Modifier = Modifier) {
                 onClickCancel = { showNDOverlay = false })
         }
         Column {
-            Row {
-                Surface(color = MaterialTheme.colorScheme.primary,
-                    modifier = modifier.padding(5.dp),
-                    shape = RoundedCornerShape(15),
-                    onClick = { showIsoOverlay = true }) {
-                    Column(modifier = Modifier.padding(15.dp)) {
-                        Text("ISO")
-                        Text(isoSensitivityOptions[selectedIsoIndex].toString())
+            Surface(color = MaterialTheme.colorScheme.secondary) {
+                Row() {
+                    Surface(color = MaterialTheme.colorScheme.primary,
+                        modifier = modifier.padding(5.dp),
+                        shape = RoundedCornerShape(15),
+                        onClick = { showIsoOverlay = true }) {
+                        Column(modifier = Modifier.padding(15.dp)) {
+                            Text("ISO")
+                            Text(isoSensitivityOptions[selectedIsoIndex].toString())
+                        }
+                    }
+                    Surface(color = MaterialTheme.colorScheme.primary,
+                        modifier = modifier.padding(5.dp),
+                        shape = RoundedCornerShape(15),
+                        onClick = { showNDOverlay = true }) {
+                        Column(modifier = Modifier.padding(15.dp)) {
+                            Text("ND")
+                            Text(if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString())
+                        }
+                    }
+                    CameraPreviewScreen()
+                }
+            }
+
+            // Camera button row
+            Row(modifier = Modifier.padding(8.dp)) {
+                Spacer(modifier = Modifier.weight(1F))
+
+                // TODO Additional Button necessary
+                IconButton(
+                    onClick = { /*TODO*/ },
+                    modifier = Modifier
+                        .size(35.dp)
+                        .align(Alignment.CenterVertically)
+                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
+
+                Spacer(modifier = Modifier.weight(1F))
+
+                IconButton(
+                    onClick = { /*TODO*/ },
+                    modifier = Modifier
+                        .size(70.dp)
+                        .align(Alignment.CenterVertically)
+                        .background(Color.Black, shape = CircleShape)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black)
+                                .align(Alignment.Center)
+                        )
                     }
                 }
-                Surface(color = MaterialTheme.colorScheme.primary,
-                    modifier = modifier.padding(5.dp),
-                    shape = RoundedCornerShape(15),
-                    onClick = { showNDOverlay = true }) {
-                    Column(modifier = Modifier.padding(15.dp)) {
-                        Text("ND")
-                        Text(if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString())
-                    }
-                }
-                CameraPreviewScreen(Modifier.fillMaxWidth())
+
+                Spacer(modifier = Modifier.weight(1F))
+
+                IconButton(
+                    onClick = { /*TODO*/ },
+                    modifier = Modifier
+                        .size(35.dp)
+                        .align(Alignment.CenterVertically)
+                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
+
+                Spacer(modifier = Modifier.weight(1F))
             }
         }
     }

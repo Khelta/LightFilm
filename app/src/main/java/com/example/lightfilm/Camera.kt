@@ -7,12 +7,17 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlin.coroutines.resume
@@ -35,8 +40,18 @@ fun CameraPreviewScreen(modifier: Modifier = Modifier) {
         preview.surfaceProvider = previewView.surfaceProvider
     }
 
-    AndroidView(factory = { previewView }, modifier = Modifier.aspectRatio(4f/3f).fillMaxHeight(0.8f))
-
+    Surface(
+        shape = RoundedCornerShape(15),
+        modifier = modifier.padding(10.dp),
+        color = MaterialTheme.colorScheme.primary
+    ) {
+        AndroidView(
+            factory = { previewView },
+            modifier = modifier
+                .aspectRatio(3f / 4f)
+                .fillMaxHeight(0.2f)
+        )
+    }
 }
 
 private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
