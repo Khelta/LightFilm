@@ -1,9 +1,9 @@
 package com.example.lightfilm
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -26,16 +26,52 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import com.example.lightfilm.ui.theme.LightFilmTheme
-
+import android.Manifest
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 
 class MainActivity : ComponentActivity() {
+
+    private val cameraPermissionRequest =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                setCameraPreview()
+            } else {
+                // Camera permission denied
+            }
+
+        }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) -> {
+                setCameraPreview()
+            }
+            else -> {
+                cameraPermissionRequest.launch(Manifest.permission.CAMERA)
+            }
+        }
+
+    }
+    private fun setCameraPreview() {
         setContent {
             LightFilmTheme {
-                MyApp(modifier = Modifier)
+                Surface(
+                    modifier = Modifier,
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MyApp()
+                }
             }
         }
     }
