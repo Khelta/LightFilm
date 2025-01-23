@@ -1,12 +1,18 @@
 package com.example.lightfilm
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,21 +37,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.ui.theme.LightFilmTheme
 import kotlin.math.log2
+import kotlin.math.pow
 
 @Composable
 fun Measurement(modifier: Modifier = Modifier) {
     var showIsoOverlay by remember { mutableStateOf(false) }
-    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(18) }
+    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    var ev = 0
+    var ev = 5.0
 
     fun handleIsoValueSelected(value: Int) {
         selectedIsoIndex = value
@@ -55,6 +63,10 @@ fun Measurement(modifier: Modifier = Modifier) {
     fun handleNDValueSelected(value: Int) {
         selectedNDIndex = value
         showNDOverlay = false
+    }
+
+    fun calculateEV(f: Double, s: Double) {
+        ev = log2(f.pow(2) / s)
     }
 
     Box {
@@ -70,8 +82,13 @@ fun Measurement(modifier: Modifier = Modifier) {
                 onClickCancel = { showNDOverlay = false })
         }
         Column {
-            Surface(color = MaterialTheme.colorScheme.secondary) {
-                Row() {
+            Surface(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .padding(bottom = 8.dp),
+                color = MaterialTheme.colorScheme.secondary
+            ) {
+                Row {
                     Surface(color = MaterialTheme.colorScheme.primary,
                         modifier = modifier.padding(5.dp),
                         shape = RoundedCornerShape(15),
@@ -94,55 +111,71 @@ fun Measurement(modifier: Modifier = Modifier) {
                 }
             }
 
+            Row(
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(8.dp)
+            ) {
+                Column { FStopTable() }
+                Column { }
+            }
+
             // Camera button row
-            Row(modifier = Modifier.padding(8.dp)) {
-                Spacer(modifier = Modifier.weight(1F))
-
-                // TODO Additional Button necessary
-                IconButton(
-                    onClick = { /*TODO*/ },
+            Surface(color = MaterialTheme.colorScheme.surfaceDim) {
+                Row(
                     modifier = Modifier
-                        .size(35.dp)
-                        .align(Alignment.CenterVertically)
-                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
-                ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
-
-                Spacer(modifier = Modifier.weight(1F))
-
-                IconButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-                        .size(70.dp)
-                        .align(Alignment.CenterVertically)
-                        .background(Color.Black, shape = CircleShape)
+                        .wrapContentHeight()
+                        .padding(8.dp)
                 ) {
-                    Box(
+
+                    Spacer(modifier = Modifier.weight(1F))
+
+                    // TODO Additional Button necessary
+                    IconButton(
+                        onClick = { /*TODO*/ },
                         modifier = Modifier
-                            .size(60.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
+                            .size(35.dp)
+                            .align(Alignment.CenterVertically)
+                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                    ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
+
+                    Spacer(modifier = Modifier.weight(1F))
+
+                    IconButton(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .size(70.dp)
+                            .align(Alignment.CenterVertically)
+                            .background(Color.Black, shape = CircleShape)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
+                                .size(60.dp)
                                 .clip(CircleShape)
-                                .background(Color.Black)
-                                .align(Alignment.Center)
-                        )
+                                .background(Color.White)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.Black)
+                                    .align(Alignment.Center)
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.weight(1F))
+
+                    IconButton(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier
+                            .size(35.dp)
+                            .align(Alignment.CenterVertically)
+                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                    ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
+
+                    Spacer(modifier = Modifier.weight(1F))
                 }
-
-                Spacer(modifier = Modifier.weight(1F))
-
-                IconButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-                        .size(35.dp)
-                        .align(Alignment.CenterVertically)
-                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
-                ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
-
-                Spacer(modifier = Modifier.weight(1F))
             }
         }
     }
@@ -225,10 +258,73 @@ fun DropdownItem(
         Text(value, modifier = modifier.weight(1F))
         Text(helperValue, modifier = modifier.padding(10.dp))
     }
-
 }
 
-@Preview(showBackground = true)
+@Composable
+fun FStopTableEntry(apertureDisplayed: Double, ev: Double) {
+    Box(modifier = Modifier.fillMaxWidth().height(25.dp)) {
+        val padding = 64.dp
+        val canvasPadding = padding + 64.dp
+
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val startX = canvasPadding.toPx()
+            val endX = size.width - canvasPadding.toPx()
+            val centerY = size.height / 2
+
+            drawLine(
+                color = Color.Gray,
+                start = Offset(startX, centerY),
+                end = Offset(endX, centerY),
+                strokeWidth = 5f
+            )
+
+            drawLine(
+                color = Color.Gray,
+                start = Offset(size.width / 2, 0f),
+                end = Offset(size.width / 2, size.height),
+                strokeWidth = 5f
+            )
+
+
+        }
+
+        Row(modifier = Modifier.fillMaxSize().padding(horizontal = padding), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text("f/$apertureDisplayed")
+
+
+            val shutterSpeed = apertureDisplayed.pow(2.0) / 2.0.pow(ev)
+            Text(
+                if (shutterSpeed >= 1) {
+                    String.format(
+                        if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"",
+                        shutterSpeed
+                    )
+                } else {
+                    String.format("1/%.0f", (1.0 / shutterSpeed))
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun FStopTable(aperture: Double = 2.0, ev: Double = 5.0) {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        fNumbers.forEach { f ->
+            FStopTableEntry(apertureDisplayed = f, ev = ev)
+        }
+    }
+}
+
+@Preview(showBackground = true, heightDp = 200)
+@Composable
+fun FStopTablePreview() {
+    LightFilmTheme {
+        FStopTable()
+    }
+}
+
+@Preview(showBackground = true, heightDp = 500)
 @Composable
 fun MeasurementPreview() {
     LightFilmTheme {

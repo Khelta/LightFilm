@@ -1,6 +1,6 @@
 package com.example.lightfilm
 
-val isoSensitivityOptions = listOf(
+val isoSensitivityOptions: List<Int> = listOf(
     3,
     4,
     5,
@@ -40,14 +40,31 @@ val isoSensitivityOptions = listOf(
     12800
 )
 
-val ndSensitivityOptions = listOf(
+val ndSensitivityOptions: List<Int> = listOf(
     0, 2, 4, 8, 16, 32, 64, 100, 128, 256, 400, 512, 1024, 2048, 4096, 6310, 8192, 10000
 )
 
-enum class Scene{
-    FILMLIST,
-    PICTURELIST,
-    PICTUREDETAILS,
-    MEASUREMENTS,
-    FILMCREATION
+val fNumbers: List<Double> = listOf(
+    0.7,
+    1.0,
+    1.4,
+    2.0,
+    2.8,
+    4.0,
+    5.6,
+    8.0,
+    11.0,
+    16.0,
+    22.0,
+    32.0,
+    45.0,
+    64.0,
+    90.0,
+    128.0,
+    180.0,
+    256.0
+)
+
+enum class Scene {
+    FILMLIST, PICTURELIST, PICTUREDETAILS, MEASUREMENTS, FILMCREATION
 }
