@@ -1,5 +1,6 @@
 package com.example.lightfilm
 
+import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,7 +56,10 @@ fun Measurement(modifier: Modifier = Modifier) {
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    var ev = 5.0
+    val imageCapture = ImageCapture.Builder().build()
+    val context = LocalContext.current
+
+    var exposureValue by remember { mutableDoubleStateOf(-1.0) }
 
     fun handleIsoValueSelected(value: Int) {
         selectedIsoIndex = value
@@ -65,8 +71,9 @@ fun Measurement(modifier: Modifier = Modifier) {
         showNDOverlay = false
     }
 
-    fun calculateEV(f: Double, s: Double) {
-        ev = log2(f.pow(2) / s)
+    fun handleEV(value: Double) {
+        exposureValue = value
+        println(exposureValue)
     }
 
     Box {
@@ -98,6 +105,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                             Text(isoSensitivityOptions[selectedIsoIndex].toString())
                         }
                     }
+
                     Surface(color = MaterialTheme.colorScheme.primary,
                         modifier = modifier.padding(5.dp),
                         shape = RoundedCornerShape(15),
@@ -107,7 +115,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                             Text(if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString())
                         }
                     }
-                    CameraPreviewScreen()
+
+                    CameraPreviewScreen(imageCapture = imageCapture)
                 }
             }
 
@@ -116,8 +125,14 @@ fun Measurement(modifier: Modifier = Modifier) {
                     .weight(1F)
                     .padding(8.dp)
             ) {
-                Column { FStopTable() }
-                Column { }
+                Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable() }
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        String.format(
+                            "%.1f EV", exposureValue
+                        )
+                    )
+                }
             }
 
             // Camera button row
@@ -142,7 +157,11 @@ fun Measurement(modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.weight(1F))
 
                     IconButton(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            onImageCaptureClick(imageCapture = imageCapture,
+                                applicationContext = context,
+                                onEVCalculated = { handleEV(it) })
+                        },
                         modifier = Modifier
                             .size(70.dp)
                             .align(Alignment.CenterVertically)
@@ -261,10 +280,14 @@ fun DropdownItem(
 }
 
 @Composable
-fun FStopTableEntry(apertureDisplayed: Double, ev: Double) {
-    Box(modifier = Modifier.fillMaxWidth().height(25.dp)) {
+fun FStopTableEntry(apertureDisplayed: Double, ev: Double, isFullStop: Boolean = false) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(25.dp)
+    ) {
         val padding = 64.dp
-        val canvasPadding = padding + 64.dp
+        val canvasPadding = if (isFullStop) padding + 64.dp else padding + 92.dp
 
         Canvas(modifier = Modifier.fillMaxSize()) {
             val startX = canvasPadding.toPx()
@@ -288,16 +311,21 @@ fun FStopTableEntry(apertureDisplayed: Double, ev: Double) {
 
         }
 
-        Row(modifier = Modifier.fillMaxSize().padding(horizontal = padding), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("f/$apertureDisplayed")
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = padding),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("f/%.1f".format(apertureDisplayed))
 
 
             val shutterSpeed = apertureDisplayed.pow(2.0) / 2.0.pow(ev)
             Text(
                 if (shutterSpeed >= 1) {
                     String.format(
-                        if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"",
-                        shutterSpeed
+                        if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"", shutterSpeed
                     )
                 } else {
                     String.format("1/%.0f", (1.0 / shutterSpeed))
@@ -310,8 +338,12 @@ fun FStopTableEntry(apertureDisplayed: Double, ev: Double) {
 @Composable
 fun FStopTable(aperture: Double = 2.0, ev: Double = 5.0) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        fNumbers.forEach { f ->
-            FStopTableEntry(apertureDisplayed = f, ev = ev)
+        fNumbers.forEachIndexed() { index, f ->
+            FStopTableEntry(apertureDisplayed = f, ev = ev, isFullStop = true)
+            if (index != fNumbers.size - 1) {
+                FStopTableEntry(f + ((fNumbers[index + 1] - f) / 3), ev)
+                FStopTableEntry(f + ((fNumbers[index + 1] - f) / 3 * 2), ev)
+            }
         }
     }
 }

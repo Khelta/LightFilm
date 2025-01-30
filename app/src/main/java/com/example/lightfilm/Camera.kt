@@ -2,6 +2,9 @@ package com.example.lightfilm
 
 import android.content.Context
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -20,11 +23,18 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
+import java.io.ByteArrayInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.log2
+import kotlin.math.pow
 
 @Composable
-fun CameraPreviewScreen(modifier: Modifier = Modifier) {
+fun CameraPreviewScreen(
+    modifier: Modifier = Modifier,
+    imageCapture: ImageCapture,
+) {
     val lensFacing = CameraSelector.LENS_FACING_BACK
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -36,7 +46,7 @@ fun CameraPreviewScreen(modifier: Modifier = Modifier) {
     LaunchedEffect(lensFacing) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview)
+        cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
         preview.surfaceProvider = previewView.surfaceProvider
     }
 
@@ -46,8 +56,7 @@ fun CameraPreviewScreen(modifier: Modifier = Modifier) {
         color = MaterialTheme.colorScheme.primary
     ) {
         AndroidView(
-            factory = { previewView },
-            modifier = modifier
+            factory = { previewView }, modifier = modifier
                 .aspectRatio(3f / 4f)
                 .fillMaxHeight(0.2f)
         )
@@ -62,3 +71,39 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
             }, ContextCompat.getMainExecutor(this))
         }
     }
+
+fun onImageCaptureClick(
+    imageCapture: ImageCapture,
+    applicationContext: Context,
+    onEVCalculated: (Double) -> Unit = {}
+) {
+    val callbackObject = object : ImageCapture.OnImageCapturedCallback() {
+        override fun onError(error: ImageCaptureException) {
+            println("error: $error")
+        }
+
+        override fun onCaptureSuccess(image: ImageProxy) {
+            super.onCaptureSuccess(image)
+            println(image.imageInfo)
+
+            val bb = image.planes[0].buffer
+            val buffer = ByteArray(bb.remaining())
+            bb.get(buffer)
+            val exposureTime = ExifInterface(ByteArrayInputStream(buffer)).getAttribute(
+                ExifInterface.TAG_EXPOSURE_TIME
+            )
+                ?.toDouble() ?: 0.0
+            val iso =
+                ExifInterface(ByteArrayInputStream(buffer)).getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
+                    ?.toShort() ?: 0
+            val aperture = ExifInterface(ByteArrayInputStream(buffer)).getAttribute(
+                ExifInterface.TAG_F_NUMBER
+            )?.toDouble() ?: 0.0
+
+            println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
+            val ev = log2(100 * aperture.pow(2.0) / (iso * exposureTime))
+            onEVCalculated(ev)
+        }
+    }
+    imageCapture.takePicture(ContextCompat.getMainExecutor(applicationContext), callbackObject)
+}

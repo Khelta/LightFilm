@@ -45,7 +45,6 @@ val ndSensitivityOptions: List<Int> = listOf(
 )
 
 val fNumbers: List<Double> = listOf(
-    0.7,
     1.0,
     1.4,
     2.0,
