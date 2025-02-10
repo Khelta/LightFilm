@@ -3,16 +3,15 @@ package com.example.lightfilm
 import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -46,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.ui.theme.LightFilmTheme
+import kotlin.math.abs
 import kotlin.math.log2
 import kotlin.math.pow
 
@@ -59,7 +59,7 @@ fun Measurement(modifier: Modifier = Modifier) {
     val imageCapture = ImageCapture.Builder().build()
     val context = LocalContext.current
 
-    var exposureValue by remember { mutableDoubleStateOf(-1.0) }
+    var exposureValue by remember { mutableDoubleStateOf(7.5) }
 
     fun handleIsoValueSelected(value: Int) {
         selectedIsoIndex = value
@@ -125,7 +125,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                     .weight(1F)
                     .padding(8.dp)
             ) {
-                Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable() }
+                Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable(ev=exposureValue) }
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         String.format(
@@ -280,69 +280,93 @@ fun DropdownItem(
 }
 
 @Composable
-fun FStopTableEntry(apertureDisplayed: Double, ev: Double, isFullStop: Boolean = false) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(25.dp)
+fun CrosshairItem(
+    f: Double,
+    shutterSpeed: Double,
+    isFullStop: Boolean = true,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        val padding = 64.dp
-        val canvasPadding = if (isFullStop) padding + 64.dp else padding + 92.dp
-
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val startX = canvasPadding.toPx()
-            val endX = size.width - canvasPadding.toPx()
-            val centerY = size.height / 2
-
-            drawLine(
-                color = Color.Gray,
-                start = Offset(startX, centerY),
-                end = Offset(endX, centerY),
-                strokeWidth = 5f
-            )
-
-            drawLine(
-                color = Color.Gray,
-                start = Offset(size.width / 2, 0f),
-                end = Offset(size.width / 2, size.height),
-                strokeWidth = 5f
-            )
-
-
-        }
-
-        Row(
+        // Fixed-width area for Text1
+        Text(
+            text = String.format("f/%.1f",f),
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = padding),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .width(80.dp) // Set a fixed width here
+                .padding(end = 8.dp),
+            textAlign = TextAlign.End // Align text to the end of the area
+        )
+
+        // Spacer to push the crosshair to the right
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Canvas(
+            modifier = Modifier
+                .width(40.dp)
+                .height(30.dp)
         ) {
-            Text("f/%.1f".format(apertureDisplayed))
+            val canvasWidth = size.width
+            val canvasHeight = size.height
+            val centerX = canvasWidth / 2
+            val centerY = canvasHeight / 2
 
+            // Draw vertical line
+            drawLine(
+                color = Color.Gray,
+                start = Offset(x = centerX, y = 0f),
+                end = Offset(x = centerX, y = canvasHeight),
+                strokeWidth = 2f
+            )
 
-            val shutterSpeed = apertureDisplayed.pow(2.0) / 2.0.pow(ev)
-            Text(
-                if (shutterSpeed >= 1) {
-                    String.format(
-                        if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"", shutterSpeed
-                    )
-                } else {
-                    String.format("1/%.0f", (1.0 / shutterSpeed))
-                }
+            // Draw horizontal line
+            val xStart = if (isFullStop) 0f else canvasWidth/4
+            val xEnd = if (isFullStop) canvasWidth else canvasWidth/4*3
+            drawLine(
+                color = Color.Gray,
+                start = Offset(x = xStart, y = centerY),
+                end = Offset(x = xEnd, y = centerY),
+                strokeWidth = 2f
             )
         }
+        // Spacer to push the text2 to the right
+        Spacer(modifier = Modifier.width(8.dp))
+
+        val shutterSpeedText =
+        if (shutterSpeed >= 1) {
+            String.format(
+                if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"", shutterSpeed
+            )
+        } else {
+            String.format("1/%.0f", (1.0 / shutterSpeed))
+        }
+
+        Text(text = shutterSpeedText, modifier = Modifier.padding(start = 8.dp))
     }
 }
 
 @Composable
 fun FStopTable(aperture: Double = 2.0, ev: Double = 5.0) {
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+
         fNumbers.forEachIndexed() { index, f ->
-            FStopTableEntry(apertureDisplayed = f, ev = ev, isFullStop = true)
+            val shutterSpeed = findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f, ev, 100))
+            CrosshairItem(f, shutterSpeed)
             if (index != fNumbers.size - 1) {
-                FStopTableEntry(f + ((fNumbers[index + 1] - f) / 3), ev)
-                FStopTableEntry(f + ((fNumbers[index + 1] - f) / 3 * 2), ev)
+                val f2 = (f + ((fNumbers[index + 1] - f) / 3))
+                val s2 = findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f2, ev, 100))
+                val f3 = (f + ((fNumbers[index + 1] - f) / 3  * 2))
+                val s3 = findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f3, ev, 100))
+
+                CrosshairItem(f2, s2, false)
+                CrosshairItem(f3, s3, false)
             }
         }
     }

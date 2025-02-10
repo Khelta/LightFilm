@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier,
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyApp()
+                    Measurement()
                 }
             }
         }
