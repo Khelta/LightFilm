@@ -56,7 +56,7 @@ fun Measurement(modifier: Modifier = Modifier) {
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    val imageCapture = ImageCapture.Builder().build()
+    val imageCapture = remember{ImageCapture.Builder().build()}
     val context = LocalContext.current
 
     var exposureValue by remember { mutableDoubleStateOf(7.5) }
@@ -88,7 +88,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                 onClickSelect = ::handleNDValueSelected,
                 onClickCancel = { showNDOverlay = false })
         }
-        Column {
+        Column(modifier = modifier) {
             Surface(
                 modifier = Modifier
                     .wrapContentHeight()

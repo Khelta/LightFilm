@@ -66,11 +66,10 @@ class MainActivity : ComponentActivity() {
     private fun setCameraPreview() {
         setContent {
             LightFilmTheme {
-                Surface(
-                    modifier = Modifier,
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Measurement()
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        Measurement(Modifier
+                            .padding(innerPadding))
+
                 }
             }
         }
