@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,9 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.ui.theme.LightFilmTheme
-import kotlin.math.abs
 import kotlin.math.log2
-import kotlin.math.pow
 
 @Composable
 fun Measurement(modifier: Modifier = Modifier) {
@@ -56,12 +56,13 @@ fun Measurement(modifier: Modifier = Modifier) {
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    val imageCapture = remember{ImageCapture.Builder().build()}
+    val imageCapture = remember { ImageCapture.Builder().build() }
     val context = LocalContext.current
 
     var exposureValue by remember { mutableDoubleStateOf(7.5) }
 
     fun handleIsoValueSelected(value: Int) {
+        // TODO - Update EV when called
         selectedIsoIndex = value
         showIsoOverlay = false
     }
@@ -77,17 +78,27 @@ fun Measurement(modifier: Modifier = Modifier) {
     }
 
     Box {
+
         if (showIsoOverlay) {
-            DropdownSelection(selectedValue = selectedIsoIndex,
-                onClickSelect = ::handleIsoValueSelected,
-                onClickCancel = { showIsoOverlay = false })
+            ValueSelectionDialog(
+                modifier = Modifier,
+                onDismissRequest = { showIsoOverlay = false },
+                onConfirmationRequest = ::handleIsoValueSelected,
+                isIsoSelection = true,
+                selectedValue = selectedIsoIndex
+            )
         }
         if (showNDOverlay) {
-            DropdownSelection(isIsoSelection = false,
-                selectedValue = selectedNDIndex,
-                onClickSelect = ::handleNDValueSelected,
-                onClickCancel = { showNDOverlay = false })
+            ValueSelectionDialog(
+                modifier = Modifier,
+                onDismissRequest = { showNDOverlay = false },
+                onConfirmationRequest = ::handleNDValueSelected,
+                isIsoSelection = false,
+                selectedValue = selectedNDIndex
+            )
         }
+
+
         Column(modifier = modifier) {
             Surface(
                 modifier = Modifier
@@ -125,7 +136,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                     .weight(1F)
                     .padding(8.dp)
             ) {
-                Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable(ev=exposureValue) }
+                Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable(ev = exposureValue) }
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         String.format(
@@ -200,67 +211,93 @@ fun Measurement(modifier: Modifier = Modifier) {
     }
 }
 
-
 @Composable
-fun DropdownSelection(
-    modifier: Modifier = Modifier,
-    isIsoSelection: Boolean = true,
-    selectedValue: Int = if (isIsoSelection) 18 else 0,
-    onClickSelect: (Int) -> Unit = {},
-    onClickCancel: () -> Unit = {}
+fun ValueSelectionDialog(
+    modifier: Modifier,
+    isIsoSelection: Boolean,
+    onDismissRequest: () -> Unit,
+    onConfirmationRequest: (Int) -> Unit,
+    selectedValue: Int,
 ) {
     var selected by rememberSaveable { mutableIntStateOf(selectedValue) }
     val selectionItems = if (isIsoSelection) isoSensitivityOptions else ndSensitivityOptions
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(10),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(if (isIsoSelection) "ISO" else "ND", textAlign = TextAlign.Center)
-            Text(if (isIsoSelection) "Film sensitivity" else "Neutral density filter factor")
-            HorizontalDivider()
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .weight(1F)
+    androidx.compose.material3.AlertDialog(
+        modifier = modifier.fillMaxHeight(0.66f),
+        // TODO - Select fitting Icons
+        icon = {
+            Icon(
+                if (isIsoSelection) Icons.Default.Add else Icons.Default.Settings,
+                contentDescription = "Example Icon"
+            )
+        },
+        title = {
+            Text(text = if (isIsoSelection) "ISO" else "ND")
+        },
+        text = {
+
+            Surface(
+                shape = RoundedCornerShape(10),
+                color = MaterialTheme.colorScheme.background
             ) {
+                Column(
+                    modifier = Modifier.padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(if (isIsoSelection) "Film sensitivity" else "Neutral density filter factor")
+                    HorizontalDivider()
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .weight(1F)
+                    ) {
 
-                selectionItems.forEachIndexed { index, value ->
-                    // Calculates the evValues for ISO and ND values
-                    val evValue =
-                        if (isIsoSelection) log2(value.toDouble() / selectionItems[selected]) else if (selectionItems[selected] == 0 && value == 0) 0.0 else if (selectionItems[selected] == 0) 0 - log2(
-                            value.toDouble()
-                        ) else if (value == 0) log2(selectionItems[selected].toDouble()) else log2(
-                            selectionItems[selected].toDouble()
-                        ) - log2(value.toDouble())
-                    val sign =
-                        if (isIsoSelection) if (evValue >= 0) "+" else "" else if (evValue >= 0) "+" else ""
+                        selectionItems.forEachIndexed { index, value ->
+                            // Calculates the evValues for ISO and ND values
+                            val evValue =
+                                if (isIsoSelection) log2(value.toDouble() / selectionItems[selected]) else if (selectionItems[selected] == 0 && value == 0) 0.0 else if (selectionItems[selected] == 0) 0 - log2(
+                                    value.toDouble()
+                                ) else if (value == 0) log2(selectionItems[selected].toDouble()) else log2(
+                                    selectionItems[selected].toDouble()
+                                ) - log2(value.toDouble())
+                            val sign =
+                                if (isIsoSelection) if (evValue >= 0) "+" else "" else if (evValue >= 0) "+" else ""
 
-                    DropdownItem(
-                        value = if (value == 0) "None" else value.toString(),
-                        helperValue = if (evValue == 0.0) "" else String.format(
-                            "$sign%.1f EV", evValue
-                        ),
-                        onClick = { selected = index },
-                        selected = selected == index
-                    )
+                            DropdownItem(
+                                value = if (value == 0) "None" else value.toString(),
+                                helperValue = if (evValue == 0.0) "" else String.format(
+                                    "$sign%.1f EV", evValue
+                                ),
+                                onClick = { selected = index },
+                                selected = selected == index
+                            )
+                        }
+                    }
+                    HorizontalDivider()
                 }
             }
-            HorizontalDivider()
-            Row {
-                Surface(modifier = Modifier.weight(1F)) { }
-                TextButton(onClick = onClickCancel) {
-                    Text("Cancel")
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmationRequest(selected)
                 }
-                TextButton(onClick = { onClickSelect(selected) }) {
-                    Text("Select")
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
                 }
+            ) {
+                Text("Dismiss")
             }
         }
-    }
+    )
 }
 
 
@@ -292,7 +329,7 @@ fun CrosshairItem(
     ) {
         // Fixed-width area for Text1
         Text(
-            text = String.format("f/%.1f",f),
+            text = String.format("f/%.1f", f),
             modifier = Modifier
                 .width(80.dp) // Set a fixed width here
                 .padding(end = 8.dp),
@@ -321,8 +358,8 @@ fun CrosshairItem(
             )
 
             // Draw horizontal line
-            val xStart = if (isFullStop) 0f else canvasWidth/4
-            val xEnd = if (isFullStop) canvasWidth else canvasWidth/4*3
+            val xStart = if (isFullStop) 0f else canvasWidth / 4
+            val xEnd = if (isFullStop) canvasWidth else canvasWidth / 4 * 3
             drawLine(
                 color = Color.Gray,
                 start = Offset(x = xStart, y = centerY),
@@ -334,13 +371,13 @@ fun CrosshairItem(
         Spacer(modifier = Modifier.width(8.dp))
 
         val shutterSpeedText =
-        if (shutterSpeed >= 1) {
-            String.format(
-                if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"", shutterSpeed
-            )
-        } else {
-            String.format("1/%.0f", (1.0 / shutterSpeed))
-        }
+            if (shutterSpeed >= 1) {
+                String.format(
+                    if (shutterSpeed.rem(1).equals(0.0)) "%.0f\"" else "%.1f\"", shutterSpeed
+                )
+            } else {
+                String.format("1/%.0f", (1.0 / shutterSpeed))
+            }
 
         Text(text = shutterSpeedText, modifier = Modifier.padding(start = 8.dp))
     }
@@ -357,12 +394,13 @@ fun FStopTable(aperture: Double = 2.0, ev: Double = 5.0) {
 
 
         fNumbers.forEachIndexed() { index, f ->
-            val shutterSpeed = findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f, ev, 100))
+            val shutterSpeed =
+                findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f, ev, 100))
             CrosshairItem(f, shutterSpeed)
             if (index != fNumbers.size - 1) {
                 val f2 = (f + ((fNumbers[index + 1] - f) / 3))
                 val s2 = findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f2, ev, 100))
-                val f3 = (f + ((fNumbers[index + 1] - f) / 3  * 2))
+                val f3 = (f + ((fNumbers[index + 1] - f) / 3 * 2))
                 val s3 = findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f3, ev, 100))
 
                 CrosshairItem(f2, s2, false)
@@ -385,15 +423,5 @@ fun FStopTablePreview() {
 fun MeasurementPreview() {
     LightFilmTheme {
         Measurement()
-    }
-}
-
-@Preview(heightDp = 500, widthDp = 300)
-@Composable
-fun DropdownPreview() {
-    LightFilmTheme {
-        DropdownSelection(
-            isIsoSelection = false,
-        )
     }
 }
