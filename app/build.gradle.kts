@@ -57,11 +57,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Camerax implementation
-    val cameraxVersion = "1.5.0-alpha05"
-    implementation ("androidx.camera:camera-core:${cameraxVersion}")
-    implementation ("androidx.camera:camera-camera2:${cameraxVersion}")
-    implementation ("androidx.camera:camera-view:${cameraxVersion}")
-    implementation ("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation (libs.androidx.camera.core)
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.view)
+    implementation (libs.androidx.camera.lifecycle)
 
     implementation(libs.androidx.exifinterface)
+
+    implementation(libs.androidx.material.icons.extended)
 }

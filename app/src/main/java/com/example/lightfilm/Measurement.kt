@@ -2,6 +2,7 @@ package com.example.lightfilm
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -44,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -97,24 +100,32 @@ fun CameraCaptureButton(imageCapture: ImageCapture, context: Context, handleEV: 
 }
 
 @Composable
-fun CameraOptionButton(onClick: () -> Unit) {
+fun CameraOptionButton(onClick: () -> Unit, imageVector: ImageVector, contentDescription: String) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
             .size(35.dp)
             .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
-    ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
+    ) { Icon(imageVector = imageVector, contentDescription) }
 }
 
 @Composable
 fun CameraCaptureButtonContent(
+    isPortrait: Boolean,
     imageCapture: ImageCapture,
     context: Context,
-    handleEV: (Double) -> Unit
+    handleEV: (Double) -> Unit,
+    switchLens: () -> Unit
 ) {
-    CameraOptionButton({/*TODO*/ })
+    val lensSwitchButton: @Composable () -> Unit =
+        { CameraOptionButton(switchLens, Icons.Filled.Cached, "Lens switching") }
+    val settingsButton: @Composable () -> Unit =
+        { CameraOptionButton({/*TODO*/ }, Icons.Filled.Settings, "Settings") }
+
+    if (isPortrait) lensSwitchButton() else settingsButton()
     CameraCaptureButton(imageCapture, context, handleEV)
-    CameraOptionButton({/*TODO*/ })
+    if (isPortrait) settingsButton() else lensSwitchButton()
+
 }
 
 @Composable
@@ -122,7 +133,8 @@ fun CameraCaptureButtonBar(
     isPortrait: Boolean,
     imageCapture: ImageCapture,
     context: Context,
-    handleEV: (Double) -> Unit
+    handleEV: (Double) -> Unit,
+    switchLens: () -> Unit
 ) {
     Surface(color = MaterialTheme.colorScheme.surfaceDim) {
         if (isPortrait) {
@@ -133,7 +145,7 @@ fun CameraCaptureButtonBar(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                CameraCaptureButtonContent(imageCapture, context, handleEV)
+                CameraCaptureButtonContent(true, imageCapture, context, handleEV, switchLens)
             }
         } else {
             Column(
@@ -143,7 +155,7 @@ fun CameraCaptureButtonBar(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                CameraCaptureButtonContent(imageCapture, context, handleEV)
+                CameraCaptureButtonContent(false, imageCapture, context, handleEV, switchLens)
             }
         }
     }
@@ -155,7 +167,8 @@ fun TopBarContent(
     showIsoOverlay: () -> Unit,
     selectedNDIndex: Int,
     showNDOverlay: () -> Unit,
-    imageCapture: ImageCapture
+    imageCapture: ImageCapture,
+    lensFacing: Int
 ) {
     Column {
         Row {
@@ -175,6 +188,7 @@ fun TopBarContent(
     }
 
     CameraPreviewScreen(
+        lensFacing = lensFacing,
         imageCapture = imageCapture,
         modifier = Modifier
             .height(250.dp)
@@ -188,6 +202,7 @@ fun Measurement(modifier: Modifier = Modifier) {
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
+    var lensFacing by remember { mutableIntStateOf(CameraSelector.LENS_FACING_BACK) }
     val imageCapture = remember { ImageCapture.Builder().build() }
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -209,6 +224,14 @@ fun Measurement(modifier: Modifier = Modifier) {
     fun handleEV(value: Double) {
         exposureValue = value
         println(exposureValue)
+    }
+
+    fun switchLens() {
+        lensFacing = if (lensFacing == CameraSelector.LENS_FACING_BACK) {
+            CameraSelector.LENS_FACING_FRONT
+        } else {
+            CameraSelector.LENS_FACING_BACK
+        }
     }
 
     Box {
@@ -248,7 +271,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                             { showIsoOverlay = true },
                             selectedNDIndex,
                             { showNDOverlay = true },
-                            imageCapture
+                            imageCapture,
+                            lensFacing
                         )
                     }
                 }
@@ -267,10 +291,9 @@ fun Measurement(modifier: Modifier = Modifier) {
                         )
                     }
                 }
-                CameraCaptureButtonBar(isPortrait, imageCapture, context, ::handleEV)
+                CameraCaptureButtonBar(true, imageCapture, context, ::handleEV, ::switchLens)
             }
-        }
-        else {
+        } else {
             Row(modifier = modifier) {
                 Surface(
                     modifier = Modifier
@@ -287,7 +310,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                             { showIsoOverlay = true },
                             selectedNDIndex,
                             { showNDOverlay = true },
-                            imageCapture
+                            imageCapture,
+                            lensFacing
                         )
                     }
                 }
@@ -297,7 +321,11 @@ fun Measurement(modifier: Modifier = Modifier) {
                         .weight(1F)
                         .padding(8.dp)
                 ) {
-                    Column(modifier = Modifier.fillMaxHeight().fillMaxWidth(0.6f)) { FStopTable(ev = exposureValue) }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(0.6f)
+                    ) { FStopTable(ev = exposureValue) }
                     Column(modifier = Modifier.fillMaxHeight()) {
                         Text(
                             String.format(
@@ -306,7 +334,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                         )
                     }
                 }
-                CameraCaptureButtonBar(isPortrait, imageCapture, context, ::handleEV)
+                CameraCaptureButtonBar(false, imageCapture, context, ::handleEV, ::switchLens)
             }
         }
     }
