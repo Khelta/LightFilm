@@ -1,8 +1,11 @@
 package com.example.lightfilm
 
+import android.content.Context
+import android.content.res.Configuration
 import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,12 +44,142 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.ui.theme.LightFilmTheme
 import kotlin.math.log2
+
+@Composable
+fun OptionElement(modifier: Modifier, upperText: String, lowerText: String, onClick: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
+        modifier = modifier,
+        shape = RoundedCornerShape(15),
+        onClick = onClick
+    ) {
+        Column(modifier = Modifier.padding(15.dp)) {
+            Text(upperText)
+            Text(lowerText)
+        }
+    }
+}
+
+@Composable
+fun CameraCaptureButton(imageCapture: ImageCapture, context: Context, handleEV: (Double) -> Unit) {
+    IconButton(
+        onClick = {
+            onImageCaptureClick(imageCapture = imageCapture,
+                applicationContext = context,
+                onEVCalculated = { handleEV(it) })
+        },
+        modifier = Modifier
+            .size(70.dp)
+            .background(Color.Black, shape = CircleShape)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black)
+                    .align(Alignment.Center)
+            )
+        }
+    }
+}
+
+@Composable
+fun CameraOptionButton(onClick: () -> Unit) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(35.dp)
+            .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+    ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
+}
+
+@Composable
+fun CameraCaptureButtonContent(
+    imageCapture: ImageCapture,
+    context: Context,
+    handleEV: (Double) -> Unit
+) {
+    CameraOptionButton({/*TODO*/ })
+    CameraCaptureButton(imageCapture, context, handleEV)
+    CameraOptionButton({/*TODO*/ })
+}
+
+@Composable
+fun CameraCaptureButtonBar(
+    isPortrait: Boolean,
+    imageCapture: ImageCapture,
+    context: Context,
+    handleEV: (Double) -> Unit
+) {
+    Surface(color = MaterialTheme.colorScheme.surfaceDim) {
+        if (isPortrait) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CameraCaptureButtonContent(imageCapture, context, handleEV)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                CameraCaptureButtonContent(imageCapture, context, handleEV)
+            }
+        }
+    }
+}
+
+@Composable
+fun TopBarContent(
+    selectedIsoIndex: Int,
+    showIsoOverlay: () -> Unit,
+    selectedNDIndex: Int,
+    showNDOverlay: () -> Unit,
+    imageCapture: ImageCapture
+) {
+    Column {
+        Row {
+            OptionElement(
+                Modifier,
+                "ISO",
+                isoSensitivityOptions[selectedIsoIndex].toString(),
+                showIsoOverlay
+            )
+            OptionElement(
+                Modifier,
+                "ND",
+                if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString(),
+                showNDOverlay
+            )
+        }
+    }
+
+    CameraPreviewScreen(
+        imageCapture = imageCapture,
+        modifier = Modifier
+            .height(250.dp)
+    )
+}
 
 @Composable
 fun Measurement(modifier: Modifier = Modifier) {
@@ -58,6 +190,8 @@ fun Measurement(modifier: Modifier = Modifier) {
 
     val imageCapture = remember { ImageCapture.Builder().build() }
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     var exposureValue by remember { mutableDoubleStateOf(7.5) }
 
@@ -78,7 +212,6 @@ fun Measurement(modifier: Modifier = Modifier) {
     }
 
     Box {
-
         if (showIsoOverlay) {
             ValueSelectionDialog(
                 modifier = Modifier,
@@ -98,114 +231,82 @@ fun Measurement(modifier: Modifier = Modifier) {
             )
         }
 
-
-        Column(modifier = modifier) {
-            Surface(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .padding(bottom = 8.dp),
-                color = MaterialTheme.colorScheme.secondary
-            ) {
-                Row {
-                    Surface(color = MaterialTheme.colorScheme.primary,
-                        modifier = modifier.padding(5.dp),
-                        shape = RoundedCornerShape(15),
-                        onClick = { showIsoOverlay = true }) {
-                        Column(modifier = Modifier.padding(15.dp)) {
-                            Text("ISO")
-                            Text(isoSensitivityOptions[selectedIsoIndex].toString())
-                        }
-                    }
-
-                    Surface(color = MaterialTheme.colorScheme.primary,
-                        modifier = modifier.padding(5.dp),
-                        shape = RoundedCornerShape(15),
-                        onClick = { showNDOverlay = true }) {
-                        Column(modifier = Modifier.padding(15.dp)) {
-                            Text("ND")
-                            Text(if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString())
-                        }
-                    }
-
-                    CameraPreviewScreen(imageCapture = imageCapture)
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .weight(1F)
-                    .padding(8.dp)
-            ) {
-                Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable(ev = exposureValue) }
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        String.format(
-                            "%.1f EV", exposureValue
+        if (isPortrait) {
+            Column(modifier = modifier) {
+                Surface(
+                    modifier = Modifier
+                        .padding(bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.secondary
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TopBarContent(
+                            selectedIsoIndex,
+                            { showIsoOverlay = true },
+                            selectedNDIndex,
+                            { showNDOverlay = true },
+                            imageCapture
                         )
-                    )
+                    }
                 }
-            }
 
-            // Camera button row
-            Surface(color = MaterialTheme.colorScheme.surfaceDim) {
                 Row(
                     modifier = Modifier
-                        .wrapContentHeight()
+                        .weight(1F)
                         .padding(8.dp)
                 ) {
-
-                    Spacer(modifier = Modifier.weight(1F))
-
-                    // TODO Additional Button necessary
-                    IconButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                            .size(35.dp)
-                            .align(Alignment.CenterVertically)
-                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
-                    ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
-
-                    Spacer(modifier = Modifier.weight(1F))
-
-                    IconButton(
-                        onClick = {
-                            onImageCaptureClick(imageCapture = imageCapture,
-                                applicationContext = context,
-                                onEVCalculated = { handleEV(it) })
-                        },
-                        modifier = Modifier
-                            .size(70.dp)
-                            .align(Alignment.CenterVertically)
-                            .background(Color.Black, shape = CircleShape)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(60.dp)
-                                .clip(CircleShape)
-                                .background(Color.White)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Black)
-                                    .align(Alignment.Center)
+                    Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable(ev = exposureValue) }
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            String.format(
+                                "%.1f EV", exposureValue
                             )
-                        }
+                        )
                     }
-
-                    Spacer(modifier = Modifier.weight(1F))
-
-                    IconButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                            .size(35.dp)
-                            .align(Alignment.CenterVertically)
-                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
-                    ) { Icon(imageVector = Icons.Default.Settings, "Settings") }
-
-                    Spacer(modifier = Modifier.weight(1F))
                 }
+                CameraCaptureButtonBar(isPortrait, imageCapture, context, ::handleEV)
+            }
+        }
+        else {
+            Row(modifier = modifier) {
+                Surface(
+                    modifier = Modifier
+                        .padding(bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.secondary
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        TopBarContent(
+                            selectedIsoIndex,
+                            { showIsoOverlay = true },
+                            selectedNDIndex,
+                            { showNDOverlay = true },
+                            imageCapture
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .weight(1F)
+                        .padding(8.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxHeight().fillMaxWidth(0.6f)) { FStopTable(ev = exposureValue) }
+                    Column(modifier = Modifier.fillMaxHeight()) {
+                        Text(
+                            String.format(
+                                "%.1f EV", exposureValue
+                            )
+                        )
+                    }
+                }
+                CameraCaptureButtonBar(isPortrait, imageCapture, context, ::handleEV)
             }
         }
     }
@@ -254,13 +355,16 @@ fun ValueSelectionDialog(
                         selectionItems.forEachIndexed { index, value ->
                             // Calculates the evValues for ISO and ND values
                             val evValue =
-                                if (isIsoSelection) log2(value.toDouble() / selectionItems[selected]) else if (selectionItems[selected] == 0 && value == 0) 0.0 else if (selectionItems[selected] == 0) 0 - log2(
-                                    value.toDouble()
-                                ) else if (value == 0) log2(selectionItems[selected].toDouble()) else log2(
-                                    selectionItems[selected].toDouble()
-                                ) - log2(value.toDouble())
+                                if (isIsoSelection) log2(value.toDouble() / selectionItems[selected])
+                                else
+                                    if (selectionItems[selected] == 0 && value == 0) 0.0 else if (selectionItems[selected] == 0) 0 - log2(
+                                        value.toDouble()
+                                    ) else
+                                        if (value == 0) log2(selectionItems[selected].toDouble())
+                                        else log2(selectionItems[selected].toDouble()) - log2(value.toDouble())
                             val sign =
-                                if (isIsoSelection) if (evValue >= 0) "+" else "" else if (evValue >= 0) "+" else ""
+                                if (evValue >= 0) "+"
+                                else ""
 
                             DropdownItem(
                                 value = if (value == 0) "None" else value.toString(),
@@ -410,17 +514,18 @@ fun FStopTable(aperture: Double = 2.0, ev: Double = 5.0) {
     }
 }
 
-@Preview(showBackground = true, heightDp = 200)
-@Composable
-fun FStopTablePreview() {
-    LightFilmTheme {
-        FStopTable()
-    }
-}
 
 @Preview(showBackground = true, heightDp = 500)
 @Composable
 fun MeasurementPreview() {
+    LightFilmTheme {
+        Measurement()
+    }
+}
+
+@Preview(showBackground = true, heightDp = 500, widthDp = 1000)
+@Composable
+fun MeasurementLandscapePreview() {
     LightFilmTheme {
         Measurement()
     }
