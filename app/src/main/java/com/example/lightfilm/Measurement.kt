@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -58,7 +59,7 @@ import kotlin.math.log2
 @Composable
 fun OptionElement(modifier: Modifier, upperText: String, lowerText: String, onClick: () -> Unit) {
     Surface(
-        color = MaterialTheme.colorScheme.primary,
+        color = MaterialTheme.colorScheme.primaryContainer,
         modifier = modifier,
         shape = RoundedCornerShape(15),
         onClick = onClick
@@ -80,19 +81,19 @@ fun CameraCaptureButton(imageCapture: ImageCapture, context: Context, handleEV: 
         },
         modifier = Modifier
             .size(70.dp)
-            .background(Color.Black, shape = CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape)
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
+                .size(64.dp)
                 .clip(CircleShape)
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.primary)
         ) {
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(58.dp)
                     .clip(CircleShape)
-                    .background(Color.Black)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .align(Alignment.Center)
             )
         }
@@ -105,7 +106,7 @@ fun CameraOptionButton(onClick: () -> Unit, imageVector: ImageVector, contentDes
         onClick = onClick,
         modifier = Modifier
             .size(35.dp)
-            .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+            .background(MaterialTheme.colorScheme.secondary, shape = CircleShape),
     ) { Icon(imageVector = imageVector, contentDescription) }
 }
 
@@ -136,7 +137,7 @@ fun CameraCaptureButtonBar(
     handleEV: (Double) -> Unit,
     switchLens: () -> Unit
 ) {
-    Surface(color = MaterialTheme.colorScheme.surfaceDim) {
+    Surface(color = MaterialTheme.colorScheme.outline) {
         if (isPortrait) {
             Row(
                 modifier = Modifier
@@ -163,6 +164,7 @@ fun CameraCaptureButtonBar(
 
 @Composable
 fun TopBarContent(
+    isPortrait: Boolean,
     selectedIsoIndex: Int,
     showIsoOverlay: () -> Unit,
     selectedNDIndex: Int,
@@ -173,13 +175,13 @@ fun TopBarContent(
     Column {
         Row {
             OptionElement(
-                Modifier,
+                Modifier.padding(8.dp),
                 "ISO",
                 isoSensitivityOptions[selectedIsoIndex].toString(),
                 showIsoOverlay
             )
             OptionElement(
-                Modifier,
+                Modifier.padding(8.dp),
                 "ND",
                 if (selectedNDIndex == 0) "None" else ndSensitivityOptions[selectedNDIndex].toString(),
                 showNDOverlay
@@ -190,8 +192,7 @@ fun TopBarContent(
     CameraPreviewScreen(
         lensFacing = lensFacing,
         imageCapture = imageCapture,
-        modifier = Modifier
-            .height(250.dp)
+        modifier = Modifier.aspectRatio(if (isPortrait) 0.75f else 1.33f)
     )
 }
 
@@ -254,12 +255,13 @@ fun Measurement(modifier: Modifier = Modifier) {
             )
         }
 
+        val colorSchemeTopBar = MaterialTheme.colorScheme.outline
         if (isPortrait) {
             Column(modifier = modifier) {
                 Surface(
                     modifier = Modifier
                         .padding(bottom = 8.dp),
-                    color = MaterialTheme.colorScheme.secondary
+                    color = colorSchemeTopBar
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -267,6 +269,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         TopBarContent(
+                            isPortrait,
                             selectedIsoIndex,
                             { showIsoOverlay = true },
                             selectedNDIndex,
@@ -277,11 +280,10 @@ fun Measurement(modifier: Modifier = Modifier) {
                     }
                 }
 
-                Row(
-                    modifier = Modifier
-                        .weight(1F)
-                        .padding(8.dp)
-                ) {
+                Surface(modifier = Modifier
+                    .weight(1F),
+                    color = MaterialTheme.colorScheme.surfaceBright){
+                Row(modifier = Modifier.padding(8.dp)){
                     Column(modifier = Modifier.fillMaxWidth(0.6f)) { FStopTable(ev = exposureValue) }
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Text(
@@ -290,7 +292,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                             )
                         )
                     }
-                }
+                }}
                 CameraCaptureButtonBar(true, imageCapture, context, ::handleEV, ::switchLens)
             }
         } else {
@@ -298,7 +300,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                 Surface(
                     modifier = Modifier
                         .padding(bottom = 8.dp),
-                    color = MaterialTheme.colorScheme.secondary
+                    color = colorSchemeTopBar
                 ) {
                     Column(
                         modifier = Modifier.fillMaxHeight(),
@@ -306,6 +308,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                         verticalArrangement = Arrangement.SpaceEvenly
                     ) {
                         TopBarContent(
+                            isPortrait,
                             selectedIsoIndex,
                             { showIsoOverlay = true },
                             selectedNDIndex,
@@ -366,7 +369,6 @@ fun ValueSelectionDialog(
 
             Surface(
                 shape = RoundedCornerShape(10),
-                color = MaterialTheme.colorScheme.background
             ) {
                 Column(
                     modifier = Modifier.padding(10.dp),
