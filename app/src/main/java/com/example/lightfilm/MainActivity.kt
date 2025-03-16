@@ -29,11 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.example.lightfilm.ui.theme.LightFilmTheme
 import android.Manifest
-import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import com.example.lightfilm.measurement.Measurement
 
 class MainActivity : ComponentActivity() {
 
