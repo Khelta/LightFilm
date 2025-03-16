@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,8 @@ fun Measurement(modifier: Modifier = Modifier) {
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     var exposureValue by rememberSaveable { mutableDoubleStateOf(-999.0) }
+
+    val exposureSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
 
     fun handleIsoValueSelected(value: Int) {
         // TODO - Update EV when called
@@ -115,7 +118,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                 }
 
 
-                MeasurementContent(Modifier.weight(1F), true, exposureValue)
+                MeasurementContent(Modifier.weight(1F), true, exposureValue, exposureSliderValue)
 
                 CameraCaptureButtonBar(
                     true,
@@ -150,7 +153,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                     }
                 }
 
-                MeasurementContent(Modifier.weight(1F), false, exposureValue)
+                MeasurementContent(Modifier.weight(1F), false, exposureValue, exposureSliderValue)
 
                 CameraCaptureButtonBar(
                     false,
