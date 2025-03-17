@@ -10,8 +10,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Brightness6
+import androidx.compose.material.icons.filled.Exposure
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -93,11 +93,10 @@ fun ValueSelectionDialog(
     val selectionItems = if (isIsoSelection) isoSensitivityOptions else ndSensitivityOptions
     androidx.compose.material3.AlertDialog(
         modifier = modifier.fillMaxHeight(0.66f),
-        // TODO - Select fitting Icons
         icon = {
             Icon(
-                if (isIsoSelection) Icons.Default.Add else Icons.Default.Settings,
-                contentDescription = "Example Icon"
+                if (isIsoSelection) Icons.Default.Exposure else Icons.Default.Brightness6,
+                contentDescription = if (isIsoSelection) "ISO Selection" else "ND Selection"
             )
         },
         title = {
