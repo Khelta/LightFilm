@@ -19,11 +19,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.ByteArrayInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -40,7 +40,9 @@ fun CameraPreviewScreen(
     val context = LocalContext.current
     val preview = Preview.Builder().build()
     val previewView = remember {
-        PreviewView(context)
+        PreviewView(context).apply {
+            scaleType = PreviewView.ScaleType.FIT_CENTER
+        }
     }
     val cameraxSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
     LaunchedEffect(lensFacing) {
@@ -53,11 +55,12 @@ fun CameraPreviewScreen(
     Surface(
         shape = RoundedCornerShape(15),
         modifier = modifier.padding(10.dp),
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.outline
     ) {
         AndroidView(
             factory = { previewView }, modifier = modifier
                 .aspectRatio(3f / 4f)
+                //TODO choose height independent from camera sensor
                 .fillMaxHeight(0.2f)
         )
     }
