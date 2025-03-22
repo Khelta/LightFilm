@@ -40,7 +40,8 @@ fun TopBarContent(
     selectedNDIndex: Int,
     showNDOverlay: () -> Unit,
     imageCapture: ImageCapture,
-    lensFacing: Int
+    lensFacing: Int,
+    linearZoom: Float
 ) {
     Column {
         Row {
@@ -62,7 +63,8 @@ fun TopBarContent(
     CameraPreviewScreen(
         lensFacing = lensFacing,
         imageCapture = imageCapture,
-        modifier = Modifier.aspectRatio(if (isPortrait) 0.75f else 1.33f)
+        modifier = Modifier.aspectRatio(if (isPortrait) 0.75f else 1.33f),
+        linearZoom = linearZoom
     )
 }
 

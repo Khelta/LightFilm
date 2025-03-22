@@ -46,6 +46,7 @@ fun Measurement(modifier: Modifier = Modifier) {
     var exposureValue by rememberSaveable { mutableDoubleStateOf(-999.0) }
 
     val exposureSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
+    val zoomSliderValue by rememberSaveable { mutableFloatStateOf(0.0f) }
 
     fun handleIsoValueSelected(value: Int) {
         // TODO - Update EV when called
@@ -111,13 +112,20 @@ fun Measurement(modifier: Modifier = Modifier) {
                             selectedNDIndex,
                             { showNDOverlay = true },
                             imageCapture,
-                            lensFacing
+                            lensFacing,
+                            zoomSliderValue
                         )
                     }
                 }
 
-
-                MeasurementContent(Modifier.weight(1F), true, exposureValue, exposureSliderValue)
+                // TODO implement onZoomSliderChange
+                MeasurementContent(
+                    Modifier.weight(1F),
+                    true,
+                    exposureValue,
+                    exposureSliderValue,
+                    zoomSliderValue
+                )
 
                 CameraCaptureButtonBar(
                     true,
@@ -147,12 +155,19 @@ fun Measurement(modifier: Modifier = Modifier) {
                             selectedNDIndex,
                             { showNDOverlay = true },
                             imageCapture,
-                            lensFacing
+                            lensFacing,
+                            zoomSliderValue
                         )
                     }
                 }
 
-                MeasurementContent(Modifier.weight(1F), false, exposureValue, exposureSliderValue)
+                MeasurementContent(
+                    Modifier.weight(1F),
+                    false,
+                    exposureValue,
+                    exposureSliderValue,
+                    zoomSliderValue
+                )
 
                 CameraCaptureButtonBar(
                     false,

@@ -34,7 +34,8 @@ import kotlin.math.pow
 fun CameraPreviewScreen(
     modifier: Modifier = Modifier,
     imageCapture: ImageCapture,
-    lensFacing: Int = CameraSelector.LENS_FACING_BACK
+    lensFacing: Int = CameraSelector.LENS_FACING_BACK,
+    linearZoom: Float
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -48,7 +49,9 @@ fun CameraPreviewScreen(
     LaunchedEffect(lensFacing) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
-        cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
+        val camera =
+            cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
+        camera.cameraControl.setLinearZoom(linearZoom)
         preview.surfaceProvider = previewView.surfaceProvider
     }
 
