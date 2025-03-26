@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-// TODO Functionality for zoom and exposure customization slider
+// TODO Functionality for exposure customization slider
 
 @Composable
 fun MeasurementContent(
@@ -33,7 +33,8 @@ fun MeasurementContent(
     isPortrait: Boolean,
     exposureValue: Double,
     sliderStartPosition: Float,
-    zoomStartPosition: Float
+    zoomStartPosition: Float,
+    onZoomSliderChange: (Float) -> Unit
 ) {
     var sliderPosition by rememberSaveable { mutableFloatStateOf(sliderStartPosition) }
     var zoomSliderPosition by rememberSaveable { mutableFloatStateOf(zoomStartPosition) }
@@ -58,13 +59,18 @@ fun MeasurementContent(
                         sliderPosition,
                         { x -> sliderPosition = x },
                         Icons.Filled.Exposure,
-                        ""
+                        "",
+                        " EV",
+                        -5f,
+                        5f
                     )
+                    //TODO Make zoom value meaningful
                     CustomSlider(
                         zoomSliderPosition,
-                        { x -> zoomSliderPosition = x },
+                        { x -> zoomSliderPosition = x; onZoomSliderChange(x) },
                         Icons.Filled.ZoomIn,
-                        ""
+                        "",
+                        "x"
                     )
                 }
             }
@@ -93,20 +99,30 @@ fun CustomSlider(
     sliderPosition: Float,
     onValueChange: (Float) -> Unit,
     icon: ImageVector,
-    iconDescription: String
+    iconDescription: String,
+    valuePostText: String,
+    minValue: Float = 0f,
+    maxValue: Float = 1f
 ) {
     Column {
+
+        val span = maxValue - minValue
+        val sliderTextValue = minValue + span * sliderPosition
+
         Slider(
             value = sliderPosition,
             onValueChange = { onValueChange(it) },
             modifier = Modifier.padding(16.dp)
         )
-        Icon(icon, iconDescription)
+        Row {
+            Icon(icon, iconDescription)
+            Text(sliderTextValue.toString() + valuePostText)
+        }
     }
 }
 
 @Preview(widthDp = 500)
 @Composable
 fun MeasurementContentPreview() {
-    MeasurementContent(Modifier, true, 0.0, 0f, 0f)
+    MeasurementContent(Modifier, true, 0.0, 0f, 0f, {})
 }

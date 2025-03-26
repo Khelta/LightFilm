@@ -1,6 +1,8 @@
 package com.example.lightfilm.measurement
 
 import android.content.res.Configuration
+import android.hardware.Camera.getCameraInfo
+import androidx.camera.core.CameraInfo
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +48,7 @@ fun Measurement(modifier: Modifier = Modifier) {
     var exposureValue by rememberSaveable { mutableDoubleStateOf(-999.0) }
 
     val exposureSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
-    val zoomSliderValue by rememberSaveable { mutableFloatStateOf(0.0f) }
+    var zoomSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
 
     fun handleIsoValueSelected(value: Int) {
         // TODO - Update EV when called
@@ -70,6 +72,11 @@ fun Measurement(modifier: Modifier = Modifier) {
         } else {
             CameraSelector.LENS_FACING_BACK
         }
+    }
+
+    fun onZoomSliderChange(value: Float) {
+        zoomSliderValue = value
+        println("HI! $value")
     }
 
     Box {
@@ -124,7 +131,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                     true,
                     exposureValue,
                     exposureSliderValue,
-                    zoomSliderValue
+                    zoomSliderValue,
+                    ::onZoomSliderChange
                 )
 
                 CameraCaptureButtonBar(
@@ -166,7 +174,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                     false,
                     exposureValue,
                     exposureSliderValue,
-                    zoomSliderValue
+                    zoomSliderValue,
+                    ::onZoomSliderChange
                 )
 
                 CameraCaptureButtonBar(

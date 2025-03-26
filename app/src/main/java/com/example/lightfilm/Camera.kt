@@ -46,13 +46,14 @@ fun CameraPreviewScreen(
         }
     }
     val cameraxSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
-    LaunchedEffect(lensFacing) {
+    LaunchedEffect(lensFacing, linearZoom) {
         val cameraProvider = context.getCameraProvider()
         cameraProvider.unbindAll()
         val camera =
             cameraProvider.bindToLifecycle(lifecycleOwner, cameraxSelector, preview, imageCapture)
-        camera.cameraControl.setLinearZoom(linearZoom)
         preview.surfaceProvider = previewView.surfaceProvider
+        camera.cameraControl.setLinearZoom(linearZoom)
+        //TODO Possibility to remove lag when changing zoom?
     }
 
     Surface(
