@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.fNumbers
 import com.example.lightfilm.findClosestNumber
@@ -65,7 +66,8 @@ fun CrosshairItem(
         Text(
             text = String.format("f/%.1f", f),
             modifier = Modifier
-                .width(80.dp) // Set a fixed width here
+                // TODO width independent solution? whats with different font sizes?
+                .width(60.dp) // Set a fixed width here
                 .padding(end = 8.dp),
             textAlign = TextAlign.End // Align text to the end of the area
         )
@@ -115,4 +117,10 @@ fun CrosshairItem(
 
         Text(text = shutterSpeedText, modifier = Modifier.padding(start = 8.dp))
     }
+}
+
+@Preview
+@Composable
+fun CrosshairItemPreview(){
+    CrosshairItem(1.0, 1.0)
 }
