@@ -27,8 +27,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.ByteArrayInputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.math.log2
-import kotlin.math.pow
 
 @Composable
 fun CameraPreviewScreen(
@@ -82,7 +80,7 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
 fun onImageCaptureClick(
     imageCapture: ImageCapture,
     applicationContext: Context,
-    onEVCalculated: (Double) -> Unit = {}
+    onEVCalculated: (Double, Double, Double) -> Unit
 ) {
     val callbackObject = object : ImageCapture.OnImageCapturedCallback() {
         override fun onError(error: ImageCaptureException) {
@@ -102,14 +100,14 @@ fun onImageCaptureClick(
                 ?.toDouble() ?: 0.0
             val iso =
                 ExifInterface(ByteArrayInputStream(buffer)).getAttribute(ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY)
-                    ?.toShort() ?: 0
+                    ?.toInt() ?: 0
             val aperture = ExifInterface(ByteArrayInputStream(buffer)).getAttribute(
                 ExifInterface.TAG_F_NUMBER
             )?.toDouble() ?: 0.0
 
             println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
-            val ev = log2(100 * aperture.pow(2.0) / (iso * exposureTime))
-            onEVCalculated(ev)
+            val ev = calculateEV(aperture, exposureTime, iso)
+            onEVCalculated(ev, aperture, exposureTime)
         }
     }
     imageCapture.takePicture(ContextCompat.getMainExecutor(applicationContext), callbackObject)

@@ -33,13 +33,13 @@ fun CameraCaptureButton(
     imageCapture: ImageCapture,
     context: Context,
     exposureValue: Double,
-    handleEV: (Double) -> Unit
+    handleEV: (Double, Double, Double) -> Unit
 ) {
     IconButton(
         onClick = {
             onImageCaptureClick(imageCapture = imageCapture,
                 applicationContext = context,
-                onEVCalculated = { handleEV(it) })
+                onEVCalculated = handleEV)
         },
         modifier = Modifier
             .size(70.dp)
@@ -92,7 +92,7 @@ fun CameraCaptureButtonContent(
     imageCapture: ImageCapture,
     context: Context,
     exposureValue: Double,
-    handleEV: (Double) -> Unit,
+    handleEV: (Double, Double, Double) -> Unit,
     switchLens: () -> Unit
 ) {
     val lensSwitchButton: @Composable () -> Unit =
@@ -112,7 +112,7 @@ fun CameraCaptureButtonBar(
     imageCapture: ImageCapture,
     context: Context,
     exposureValue: Double,
-    handleEV: (Double) -> Unit,
+    handleEV: (Double, Double, Double) -> Unit,
     switchLens: () -> Unit
 ) {
     Surface(color = MaterialTheme.colorScheme.outline) {

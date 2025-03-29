@@ -1,8 +1,6 @@
 package com.example.lightfilm.measurement
 
 import android.content.res.Configuration
-import android.hardware.Camera.getCameraInfo
-import androidx.camera.core.CameraInfo
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +27,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.lightfilm.calculateEV
+import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ui.theme.LightFilmTheme
 
 
@@ -46,24 +46,31 @@ fun Measurement(modifier: Modifier = Modifier) {
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     var exposureValue by rememberSaveable { mutableDoubleStateOf(-999.0) }
+    var aperture by rememberSaveable { mutableDoubleStateOf(-1.0) }
+    var shutterSpeed by rememberSaveable { mutableDoubleStateOf(-1.0) }
 
     val exposureSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
     var zoomSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
 
-    fun handleIsoValueSelected(value: Int) {
-        // TODO - Update EV when called
-        selectedIsoIndex = value
-        showIsoOverlay = false
-    }
-
     fun handleNDValueSelected(value: Int) {
         selectedNDIndex = value
         showNDOverlay = false
+        //TODO Implement ND affecting EV
     }
 
-    fun handleEV(value: Double) {
-        exposureValue = value
+    fun handleEV(evValue: Double, apertureValue: Double, shutterSpeedValue: Double) {
+        exposureValue = evValue
+        aperture = apertureValue
+        shutterSpeed = shutterSpeedValue
+        println("EV: $evValue, Aperture: f$apertureValue, Shutterspeed: $shutterSpeedValue")
+    }
+
+    fun handleIsoValueSelected(value: Int) {
+        selectedIsoIndex = value
+        showIsoOverlay = false
+        exposureValue = calculateEV(aperture, shutterSpeed, isoSensitivityOptions[value])
         println(exposureValue)
+        // TODO Update fstoptable
     }
 
     fun switchLens() {
@@ -103,9 +110,7 @@ fun Measurement(modifier: Modifier = Modifier) {
         if (isPortrait) {
             Column(modifier = modifier) {
                 Surface(
-                    modifier = Modifier
-                        .padding(bottom = 8.dp),
-                    color = colorSchemeTopBar
+                    modifier = Modifier.padding(bottom = 8.dp), color = colorSchemeTopBar
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -136,20 +141,13 @@ fun Measurement(modifier: Modifier = Modifier) {
                 )
 
                 CameraCaptureButtonBar(
-                    true,
-                    imageCapture,
-                    context,
-                    exposureValue,
-                    ::handleEV,
-                    ::switchLens
+                    true, imageCapture, context, exposureValue, ::handleEV, ::switchLens
                 )
             }
         } else {
             Row(modifier = modifier) {
                 Surface(
-                    modifier = Modifier
-                        .padding(bottom = 8.dp),
-                    color = colorSchemeTopBar
+                    modifier = Modifier.padding(bottom = 8.dp), color = colorSchemeTopBar
                 ) {
                     Column(
                         modifier = Modifier.fillMaxHeight(),
@@ -179,12 +177,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                 )
 
                 CameraCaptureButtonBar(
-                    false,
-                    imageCapture,
-                    context,
-                    exposureValue,
-                    ::handleEV,
-                    ::switchLens
+                    false, imageCapture, context, exposureValue, ::handleEV, ::switchLens
                 )
             }
         }

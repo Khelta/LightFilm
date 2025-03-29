@@ -1,10 +1,14 @@
 package com.example.lightfilm
 
 import kotlin.math.abs
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.log2
 import kotlin.math.pow
+import kotlin.math.round
 
-fun getShutterSpeedFromAperture(f: Double, ev: Double, ISO: Int): Double{
-    return (100 * f.pow(2))/(ISO * 2.0.pow(ev))
+fun getShutterSpeedFromAperture(f: Double, ev: Double, ISO: Int): Double {
+    return (100 * f.pow(2)) / (ISO * 2.0.pow(ev))
     //return (f.pow(2)/2.0.pow(ev))/(ISO /100 )
 }
 
@@ -14,9 +18,9 @@ fun roundToFirstSignificantDigit(number: Double): Double {
     }
 
     val absNumber = abs(number)
-    val magnitude = 10.0.pow(kotlin.math.floor(kotlin.math.log10(absNumber)))
+    val magnitude = 10.0.pow(floor(log10(absNumber)))
     val shifted = absNumber / magnitude
-    val roundedShifted = kotlin.math.round(shifted)
+    val roundedShifted = round(shifted)
     val result = roundedShifted * magnitude
 
     return if (number < 0) -result else result
@@ -24,10 +28,10 @@ fun roundToFirstSignificantDigit(number: Double): Double {
 
 fun findClosestNumber(numbers: List<Double>, target: Double): Double {
     var closestNumber = numbers[0]
-    var minDifference = kotlin.math.abs(numbers[0] - target)
+    var minDifference = abs(numbers[0] - target)
 
     for (number in numbers) {
-        val difference = kotlin.math.abs(number - target)
+        val difference = abs(number - target)
         if (difference < minDifference) {
             minDifference = difference
             closestNumber = number
@@ -35,4 +39,8 @@ fun findClosestNumber(numbers: List<Double>, target: Double): Double {
     }
 
     return closestNumber
+}
+
+fun calculateEV(aperture: Double, exposureTime: Double, iso: Int): Double {
+    return log2(aperture.pow(2.0) / exposureTime) + log2(iso.toDouble() / 100)
 }

@@ -83,6 +83,7 @@ fun OptionElement(modifier: Modifier, upperText: String, lowerText: String, onCl
     }
 }
 
+// TODO Updating +/- EV only after confirmation
 @Composable
 fun ValueSelectionDialog(
     modifier: Modifier,
