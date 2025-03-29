@@ -83,16 +83,16 @@ fun OptionElement(modifier: Modifier, upperText: String, lowerText: String, onCl
     }
 }
 
-// TODO Updating +/- EV only after confirmation
 @Composable
 fun ValueSelectionDialog(
     modifier: Modifier,
     isIsoSelection: Boolean,
     onDismissRequest: () -> Unit,
     onConfirmationRequest: (Int) -> Unit,
-    selectedValue: Int,
+    valueIndex: Int,
 ) {
-    var selected by rememberSaveable { mutableIntStateOf(selectedValue) }
+    var currentIndex by rememberSaveable { mutableIntStateOf(valueIndex) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(valueIndex) }
     val selectionItems = if (isIsoSelection) isoSensitivityOptions else ndSensitivityOptions
     androidx.compose.material3.AlertDialog(
         modifier = modifier.fillMaxHeight(0.66f),
@@ -115,6 +115,7 @@ fun ValueSelectionDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(if (isIsoSelection) "Film sensitivity" else "Neutral density filter factor")
+                    Text("Current value: " + selectionItems[currentIndex])
                     HorizontalDivider()
                     Column(
                         modifier = Modifier
@@ -125,13 +126,13 @@ fun ValueSelectionDialog(
                         selectionItems.forEachIndexed { index, value ->
                             // Calculates the evValues for ISO and ND values
                             val evValue =
-                                if (isIsoSelection) log2(value.toDouble() / selectionItems[selected])
+                                if (isIsoSelection) log2(value.toDouble() / selectionItems[currentIndex])
                                 else
-                                    if (selectionItems[selected] == 0 && value == 0) 0.0 else if (selectionItems[selected] == 0) 0 - log2(
+                                    if (selectionItems[currentIndex] == 0 && value == 0) 0.0 else if (selectionItems[currentIndex] == 0) 0 - log2(
                                         value.toDouble()
                                     ) else
-                                        if (value == 0) log2(selectionItems[selected].toDouble())
-                                        else log2(selectionItems[selected].toDouble()) - log2(value.toDouble())
+                                        if (value == 0) log2(selectionItems[currentIndex].toDouble())
+                                        else log2(selectionItems[currentIndex].toDouble()) - log2(value.toDouble())
                             val sign =
                                 if (evValue >= 0) "+"
                                 else ""
@@ -141,8 +142,8 @@ fun ValueSelectionDialog(
                                 helperValue = if (evValue == 0.0) "" else String.format(
                                     "$sign%.1f EV", evValue
                                 ),
-                                onClick = { selected = index },
-                                selected = selected == index
+                                onClick = { selectedIndex = index },
+                                selected = selectedIndex == index
                             )
                         }
                     }
@@ -156,7 +157,7 @@ fun ValueSelectionDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onConfirmationRequest(selected)
+                    onConfirmationRequest(selectedIndex)
                 }
             ) {
                 Text("Confirm")

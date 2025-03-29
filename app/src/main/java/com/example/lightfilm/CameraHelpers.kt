@@ -42,5 +42,8 @@ fun findClosestNumber(numbers: List<Double>, target: Double): Double {
 }
 
 fun calculateEV(aperture: Double, exposureTime: Double, iso: Int): Double {
-    return log2(aperture.pow(2.0) / exposureTime) + log2(iso.toDouble() / 100)
+    if (aperture > 0.0 && exposureTime > 0.0)
+        return log2(aperture.pow(2.0) / exposureTime) + log2(iso.toDouble() / 100)
+    else
+        return -999.0
 }

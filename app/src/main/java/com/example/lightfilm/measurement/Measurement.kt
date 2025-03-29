@@ -93,7 +93,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                 onDismissRequest = { showIsoOverlay = false },
                 onConfirmationRequest = ::handleIsoValueSelected,
                 isIsoSelection = true,
-                selectedValue = selectedIsoIndex
+                valueIndex = selectedIsoIndex
             )
         }
         if (showNDOverlay) {
@@ -102,7 +102,7 @@ fun Measurement(modifier: Modifier = Modifier) {
                 onDismissRequest = { showNDOverlay = false },
                 onConfirmationRequest = ::handleNDValueSelected,
                 isIsoSelection = false,
-                selectedValue = selectedNDIndex
+                valueIndex = selectedNDIndex
             )
         }
 
