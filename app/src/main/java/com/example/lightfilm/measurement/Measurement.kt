@@ -27,8 +27,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.lightfilm.applyISOandND
 import com.example.lightfilm.calculateEV
 import com.example.lightfilm.isoSensitivityOptions
+import com.example.lightfilm.ndSensitivityOptions
 import com.example.lightfilm.ui.theme.LightFilmTheme
 
 
@@ -55,11 +57,20 @@ fun Measurement(modifier: Modifier = Modifier) {
     fun handleNDValueSelected(value: Int) {
         selectedNDIndex = value
         showNDOverlay = false
-        //TODO Implement ND affecting EV
+        exposureValue = calculateEV(
+            aperture,
+            shutterSpeed,
+            isoSensitivityOptions[selectedIsoIndex],
+            ndSensitivityOptions[value]
+        )
+        // TODO Update fstoptable
     }
 
-    fun handleEV(evValue: Double, apertureValue: Double, shutterSpeedValue: Double) {
-        exposureValue = evValue
+    fun handleEV(
+        evValue: Double, apertureValue: Double, shutterSpeedValue: Double) {
+        exposureValue = applyISOandND(
+            evValue, isoSensitivityOptions[selectedIsoIndex], ndSensitivityOptions[selectedNDIndex]
+        )
         aperture = apertureValue
         shutterSpeed = shutterSpeedValue
         println("EV: $evValue, Aperture: f$apertureValue, Shutterspeed: $shutterSpeedValue")
@@ -68,7 +79,12 @@ fun Measurement(modifier: Modifier = Modifier) {
     fun handleIsoValueSelected(value: Int) {
         selectedIsoIndex = value
         showIsoOverlay = false
-        exposureValue = calculateEV(aperture, shutterSpeed, isoSensitivityOptions[value])
+        exposureValue = calculateEV(
+            aperture,
+            shutterSpeed,
+            isoSensitivityOptions[value],
+            ndSensitivityOptions[selectedNDIndex]
+        )
         println(exposureValue)
         // TODO Update fstoptable
     }

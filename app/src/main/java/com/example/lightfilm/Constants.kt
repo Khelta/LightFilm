@@ -41,7 +41,7 @@ val isoSensitivityOptions: List<Int> = listOf(
 )
 
 val ndSensitivityOptions: List<Int> = listOf(
-    0, 2, 4, 8, 16, 32, 64, 100, 128, 256, 400, 512, 1024, 2048, 4096, 6310, 8192, 10000
+    1, 2, 4, 8, 16, 32, 64, 100, 128, 256, 400, 512, 1024, 2048, 4096, 6310, 8192, 10000
 )
 
 val fNumbers: List<Double> = listOf(

@@ -115,7 +115,7 @@ fun ValueSelectionDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(if (isIsoSelection) "Film sensitivity" else "Neutral density filter factor")
-                    Text("Current value: " + selectionItems[currentIndex])
+                    Text("Current value: " + if (!isIsoSelection && currentIndex == 0) "None" else selectionItems[currentIndex])
                     HorizontalDivider()
                     Column(
                         modifier = Modifier
@@ -138,7 +138,7 @@ fun ValueSelectionDialog(
                                 else ""
 
                             DropdownItem(
-                                value = if (value == 0) "None" else value.toString(),
+                                value = if (value == 0 || (value == 1 && !isIsoSelection)) "None" else value.toString(),
                                 helperValue = if (evValue == 0.0) "" else String.format(
                                     "$sign%.1f EV", evValue
                                 ),

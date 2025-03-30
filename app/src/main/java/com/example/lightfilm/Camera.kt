@@ -106,7 +106,7 @@ fun onImageCaptureClick(
             )?.toDouble() ?: 0.0
 
             println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
-            val ev = calculateEV(aperture, exposureTime, iso)
+            val ev = calculateSimpleEV(aperture, exposureTime)
             onEVCalculated(ev, aperture, exposureTime)
         }
     }
