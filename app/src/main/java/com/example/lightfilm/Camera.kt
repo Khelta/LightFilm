@@ -1,6 +1,8 @@
 package com.example.lightfilm
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -25,6 +27,9 @@ import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.time.LocalDateTime
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -89,7 +94,8 @@ fun onImageCaptureClick(
 
         override fun onCaptureSuccess(image: ImageProxy) {
             super.onCaptureSuccess(image)
-            println(image.imageInfo)
+            val imageInfo = image.imageInfo
+            println("imageInfo: $imageInfo")
 
             val bb = image.planes[0].buffer
             val buffer = ByteArray(bb.remaining())
@@ -108,6 +114,16 @@ fun onImageCaptureClick(
             println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
             val ev = calculateSimpleEV(aperture, exposureTime)
             onEVCalculated(ev, aperture, exposureTime)
+
+            val file = File(applicationContext.filesDir, LocalDateTime.now().toString() + ".png")
+            println(file.path)
+            FileOutputStream(file).use { outputstream ->
+                val rotationMatrix = Matrix().apply{postRotate(imageInfo.rotationDegrees.toFloat())}
+                val rotatedBitmap = Bitmap.createBitmap(image.toBitmap(), 0, 0, image.width, image.height, rotationMatrix, true)
+                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputstream)
+            }
+            // TODO Save image metadata and connect to film and picture
+            image.close()
         }
     }
     imageCapture.takePicture(ContextCompat.getMainExecutor(applicationContext), callbackObject)

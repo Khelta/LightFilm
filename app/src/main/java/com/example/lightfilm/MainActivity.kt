@@ -32,6 +32,10 @@ import android.Manifest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import com.example.lightfilm.measurement.Measurement
+import com.example.lightfilm.organizing.FilmCreation
+import com.example.lightfilm.organizing.FilmList
+import com.example.lightfilm.organizing.PictureDetails
+import com.example.lightfilm.organizing.PictureList
 
 class MainActivity : ComponentActivity() {
 
@@ -65,7 +69,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             LightFilmTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        Measurement(Modifier
+                        MyApp(Modifier
                             .padding(innerPadding))
 
                 }
