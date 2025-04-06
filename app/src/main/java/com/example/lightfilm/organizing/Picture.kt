@@ -3,6 +3,7 @@ package com.example.lightfilm.organizing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,11 +22,12 @@ import com.example.lightfilm.ui.theme.LightFilmTheme
 fun Picture(
     modifier: Modifier = Modifier, pictureId: Int = -1, onPictureClick: (Int) -> Unit = {}
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
-        .background(MaterialTheme.colorScheme.primary)
-        .clickable { onPictureClick(pictureId) }) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.primary)
+            .clickable { onPictureClick(pictureId) }) {
         // Titel
         Text(
             text = "filmTitle",
@@ -51,7 +53,12 @@ fun PictureList(
 
 @Composable
 fun PictureDetails() {
-    Text("#TODO")
+
+    Row {
+        Column {
+            Text("ISO: " + "uiState.iso.toString()")
+        }
+    }
 }
 
 @Preview(showBackground = true)

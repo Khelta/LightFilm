@@ -116,7 +116,6 @@ fun onImageCaptureClick(
             onEVCalculated(ev, aperture, exposureTime)
 
             val file = File(applicationContext.filesDir, LocalDateTime.now().toString() + ".png")
-            println(file.path)
             FileOutputStream(file).use { outputstream ->
                 val rotationMatrix = Matrix().apply{postRotate(imageInfo.rotationDegrees.toFloat())}
                 val rotatedBitmap = Bitmap.createBitmap(image.toBitmap(), 0, 0, image.width, image.height, rotationMatrix, true)

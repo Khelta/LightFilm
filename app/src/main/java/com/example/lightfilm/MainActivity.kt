@@ -1,9 +1,13 @@
 package com.example.lightfilm
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,17 +31,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import com.example.lightfilm.ui.theme.LightFilmTheme
-import android.Manifest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
+import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.measurement.Measurement
 import com.example.lightfilm.organizing.FilmCreation
 import com.example.lightfilm.organizing.FilmList
 import com.example.lightfilm.organizing.PictureDetails
 import com.example.lightfilm.organizing.PictureList
+import com.example.lightfilm.ui.theme.LightFilmTheme
 
 class MainActivity : ComponentActivity() {
+    private val pictureViewmodel: PictureViewmodel by viewModels()
 
     private val cameraPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -52,6 +55,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //pictureViewmodel.insert(PictureModel(uid = 2, datetime = 0, aperture = 0.0, shutterspeed = 0.0, iso = 0))
+
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
@@ -59,19 +65,21 @@ class MainActivity : ComponentActivity() {
             ) -> {
                 setCameraPreview()
             }
+
             else -> {
                 cameraPermissionRequest.launch(Manifest.permission.CAMERA)
             }
         }
 
     }
+
     private fun setCameraPreview() {
         setContent {
             LightFilmTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                        MyApp(Modifier
-                            .padding(innerPadding))
-
+                    MyApp(
+                        Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
@@ -81,6 +89,8 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp(modifier: Modifier = Modifier) {
+
+
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
     var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
     var selectedPicture by rememberSaveable { mutableIntStateOf(value = -1) }
@@ -124,39 +134,40 @@ fun MyApp(modifier: Modifier = Modifier) {
     }
 
     Scaffold(topBar = {
-        TopAppBar(colors = topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ), title = {
-            when (activeScene) {
-                Scene.FILMLIST -> {
-                    Text("LightFilm")
+        TopAppBar(
+            colors = topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                titleContentColor = MaterialTheme.colorScheme.primary,
+            ), title = {
+                when (activeScene) {
+                    Scene.FILMLIST -> {
+                        Text("LightFilm")
+                    }
+
+                    Scene.PICTURELIST -> {
+                        Text("Film selected - $selectedFilm")
+                    }
+
+                    Scene.PICTUREDETAILS -> {
+                        Text("Picture selected - $selectedPicture")
+                    }
+
+                    else -> {
+
+                    }
                 }
 
-                Scene.PICTURELIST -> {
-                    Text("Film selected - $selectedFilm")
+            }, navigationIcon = {
+                if (activeScene != Scene.FILMLIST) {
+                    IconButton(onClick = ::handleArrowBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = ""
+                        )
+                    }
                 }
 
-                Scene.PICTUREDETAILS -> {
-                    Text("Picture selected - $selectedPicture")
-                }
-
-                else -> {
-
-                }
-            }
-
-        }, navigationIcon = {
-            if (activeScene != Scene.FILMLIST) {
-                IconButton(onClick = ::handleArrowBackClick) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = ""
-                    )
-                }
-            }
-
-        })
+            })
     }, floatingActionButton = {
         if (activeScene == Scene.FILMLIST || activeScene == Scene.PICTURELIST) {
             FloatingActionButton(onClick = {
