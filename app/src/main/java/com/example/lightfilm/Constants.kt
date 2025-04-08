@@ -121,5 +121,49 @@ val shutterSpeeds: List<Double> = listOf(
 )
 
 enum class Scene {
-    FILMLIST, PICTURELIST, PICTUREDETAILS, MEASUREMENTS, FILMCREATION
+    FILMLIST,
+    PICTURELIST,
+    PICTUREDETAILS,
+    MEASUREMENTS,
+    FILMCREATION
+}
+
+enum class Contrast(val readable: String){
+    CUSTOM("Custom"),
+    LOW("Low"),
+    LOW_MEDIUM("Low-Medium"),
+    MEDIUM("Medium"),
+    MEDIUM_HIGH("Medium-High"),
+    HIGH("High"),
+    VERY_HIGH("Very High")
+}
+
+enum class Grain(val readable: String) {
+    CUSTOM("Custom"),
+    VERY_FINE("Very Fine"),
+    FINE("Fine"),
+    NORMAL("Normal"),
+    MEDIUM("Medium"),
+    STRONG("Strong")
+}
+
+enum class FilmType(val readable: String){
+    CUSTOM("Custom"),
+    COLOR_NEGATIVE("Color Negative"),
+    BLACK_AND_WHITE("Black & White"),
+    COLOR_SLIDE("Color Slide"),
+    BLACK_AND_WHITE_SLIDE("Black & White Slide")
+}
+
+enum class FilmBrand(val readable: String){
+    CUSTOM("Custom"),
+    ADOX("ADOX"),
+    AGFA("AGFA"),
+    CINESTILL("CineStill"),
+    FOMAPAN("Fomapan"),
+    FUJIFILM("Fujifilm"),
+    ILFORD("Ilford"),
+    KENTMERE("Kentmere"),
+    KODAK("Kodak"),
+    LOMOGRAPHY("Lomography");
 }

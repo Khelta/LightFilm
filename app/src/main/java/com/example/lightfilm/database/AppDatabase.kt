@@ -7,7 +7,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.lightfilm.database.dao.PictureDao
 
-@Database(entities = [PictureModel::class], version = 1)
+@Database(entities = [PictureModel::class,
+                      FilmModel::class,
+                      UserFilmModel::class,
+                     ], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pictureDao(): PictureDao
 
@@ -20,8 +23,9 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "cool-database-name"
-                ).build()
+                    "cool-database-name.db"
+                ).createFromAsset("database/prepackaged.db")
+                    .build()
                 INSTANCE = instance
                 instance
             }

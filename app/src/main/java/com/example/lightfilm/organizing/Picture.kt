@@ -16,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.ui.theme.LightFilmTheme
+import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
 fun Picture(
@@ -30,7 +32,7 @@ fun Picture(
             .clickable { onPictureClick(pictureId) }) {
         // Titel
         Text(
-            text = "filmTitle",
+            text = "$pictureId - filmTitle",
         )
         // Untertitel
         Text(
@@ -41,22 +43,28 @@ fun Picture(
 
 @Composable
 fun PictureList(
-    listItems: List<String> = listOf("a", "b", "c"), onPictureClick: (Int) -> Unit = {}
+    viewmodel: PictureViewmodel, onPictureClick: (Int) -> Unit = {}
 ) {
+    val pictures = viewmodel.allPictures.observeAsState(emptyList())
+
     LazyColumn {
-        itemsIndexed(listItems) { index, a ->
-            Picture(pictureId = index + 1, onPictureClick = onPictureClick)
+        itemsIndexed(pictures.value) { index, picture ->
+            Picture(pictureId = index, onPictureClick = onPictureClick)
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 @Composable
-fun PictureDetails() {
+fun PictureDetails(viewmodel: PictureViewmodel, pictureIndex: Int) {
+    val pictures = viewmodel.allPictures.observeAsState(emptyList())
 
+    val iso = pictures.value[pictureIndex].iso
+    val uid = pictures.value[pictureIndex].uid
     Row {
         Column {
-            Text("ISO: " + "uiState.iso.toString()")
+            Text("ISO: $iso")
+            Text("uid: $uid")
         }
     }
 }

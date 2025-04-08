@@ -29,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.measurement.Measurement
@@ -56,7 +55,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        //pictureViewmodel.insert(PictureModel(uid = 2, datetime = 0, aperture = 0.0, shutterspeed = 0.0, iso = 0))
+        //pictureViewmodel.insert(PictureModel(uid = null, datetime = 0, aperture = 0.0, shutterspeed = 0.0, iso = 0))
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -78,7 +77,8 @@ class MainActivity : ComponentActivity() {
             LightFilmTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MyApp(
-                        Modifier.padding(innerPadding)
+                        Modifier.padding(innerPadding),
+                        pictureViewmodel
                     )
                 }
             }
@@ -88,12 +88,15 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyApp(modifier: Modifier = Modifier) {
+fun MyApp(
+    modifier: Modifier = Modifier,
+    pictureViewmodel: PictureViewmodel
+) {
 
 
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
     var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
-    var selectedPicture by rememberSaveable { mutableIntStateOf(value = -1) }
+    var selectedPicture: Int by rememberSaveable { mutableIntStateOf(value = -1) }
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
     fun handleFilmClick(filmId: Int) {
@@ -133,75 +136,85 @@ fun MyApp(modifier: Modifier = Modifier) {
         }
     }
 
-    Scaffold(topBar = {
-        TopAppBar(
-            colors = topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ), title = {
-                when (activeScene) {
-                    Scene.FILMLIST -> {
-                        Text("LightFilm")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ), title = {
+                    when (activeScene) {
+                        Scene.FILMLIST -> {
+                            Text("LightFilm")
+                        }
+
+                        Scene.PICTURELIST -> {
+                            Text("Film selected - $selectedFilm")
+                        }
+
+                        Scene.PICTUREDETAILS -> {
+                            Text("Picture selected - $selectedPicture")
+                        }
+
+                        else -> {
+
+                        }
                     }
 
-                    Scene.PICTURELIST -> {
-                        Text("Film selected - $selectedFilm")
+                }, navigationIcon = {
+                    if (activeScene != Scene.FILMLIST) {
+                        IconButton(onClick = ::handleArrowBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = ""
+                            )
+                        }
                     }
 
-                    Scene.PICTUREDETAILS -> {
-                        Text("Picture selected - $selectedPicture")
+                })
+        },
+        floatingActionButton = {
+            if (activeScene in listOf<Scene>(
+                    Scene.FILMLIST,
+                    Scene.PICTURELIST,
+                )
+            ) {
+                FloatingActionButton(onClick = {
+                    when (activeScene) {
+
+                        Scene.FILMLIST ->
+                            activeScene = Scene.FILMCREATION
+
+                        Scene.PICTURELIST -> {
+                            showMeasurement = true
+                            activeScene = Scene.MEASUREMENTS
+                        }
+
+                        else -> {}
                     }
 
-                    else -> {
-
+                }) {
+                    when (activeScene) {
+                        else -> Icon(Icons.Default.Add, contentDescription = "Add")
                     }
                 }
-
-            }, navigationIcon = {
-                if (activeScene != Scene.FILMLIST) {
-                    IconButton(onClick = ::handleArrowBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = ""
-                        )
-                    }
-                }
-
-            })
-    }, floatingActionButton = {
-        if (activeScene == Scene.FILMLIST || activeScene == Scene.PICTURELIST) {
-            FloatingActionButton(onClick = {
-                if (activeScene == Scene.PICTURELIST) {
-                    showMeasurement = true
-                    activeScene = Scene.MEASUREMENTS
-                } else if (activeScene == Scene.FILMLIST) {
-                    activeScene = Scene.FILMCREATION
-                }
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
             }
-        }
-    }) { innerPadding ->
+        }) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
             when (activeScene) {
                 Scene.MEASUREMENTS -> Measurement()
 
                 Scene.FILMLIST -> FilmList(onFilmClick = ::handleFilmClick)
 
-                Scene.PICTURELIST -> PictureList(onPictureClick = ::handlePictureClick)
+                Scene.PICTURELIST -> PictureList(
+                    pictureViewmodel,
+                    onPictureClick = ::handlePictureClick
+                )
 
-                Scene.PICTUREDETAILS -> PictureDetails()
+                Scene.PICTUREDETAILS -> PictureDetails(pictureViewmodel, selectedPicture)
 
                 Scene.FILMCREATION -> FilmCreation()
             }
         }
-    }
-}
-
-@Preview(showBackground = true, heightDp = 500, widthDp = 300)
-@Composable
-fun MyAppPreview() {
-    LightFilmTheme {
-        MyApp()
     }
 }

@@ -76,4 +76,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version")
+
+    val livedata_version = "1.7.8"
+    implementation("androidx.compose.runtime:runtime-livedata:$livedata_version")
 }
