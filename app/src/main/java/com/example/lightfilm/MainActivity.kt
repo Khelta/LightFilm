@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.measurement.Measurement
 import com.example.lightfilm.organizing.FilmCreation
@@ -40,6 +41,7 @@ import com.example.lightfilm.ui.theme.LightFilmTheme
 
 class MainActivity : ComponentActivity() {
     private val pictureViewmodel: PictureViewmodel by viewModels()
+    private val filmViewmodel: FilmViewmodel by viewModels()
 
     private val cameraPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -78,7 +80,8 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MyApp(
                         Modifier.padding(innerPadding),
-                        pictureViewmodel
+                        pictureViewmodel,
+                        filmViewmodel
                     )
                 }
             }
@@ -90,7 +93,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MyApp(
     modifier: Modifier = Modifier,
-    pictureViewmodel: PictureViewmodel
+    pictureViewmodel: PictureViewmodel,
+    filmViewmodel: FilmViewmodel
 ) {
 
 
@@ -213,7 +217,7 @@ fun MyApp(
 
                 Scene.PICTUREDETAILS -> PictureDetails(pictureViewmodel, selectedPicture)
 
-                Scene.FILMCREATION -> FilmCreation()
+                Scene.FILMCREATION -> FilmCreation(viewmodel = filmViewmodel)
             }
         }
     }

@@ -25,7 +25,8 @@ fun Film(
     id: Int = -1,
     onFilmClick: (Int) -> Unit = {}
 ) {
-    Surface(color = MaterialTheme.colorScheme.primary,
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.clickable { onFilmClick(id) }) {
         Column(
             modifier = Modifier
@@ -51,10 +52,6 @@ fun FilmList(listItems: List<String> = listOf("a", "b", "c"), onFilmClick: (Int)
     }
 }
 
-@Composable
-fun FilmCreation(modifier: Modifier = Modifier) {
-    Text("Hello FilmCreation")
-}
 
 @Preview(showBackground = true)
 @Composable

@@ -5,14 +5,30 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import com.example.lightfilm.database.converter.ContrastConverter
+import com.example.lightfilm.database.converter.FilmBrandConverter
+import com.example.lightfilm.database.converter.FilmTypeConverter
+import com.example.lightfilm.database.converter.GrainConverter
+import com.example.lightfilm.database.dao.FilmDao
 import com.example.lightfilm.database.dao.PictureDao
 
-@Database(entities = [PictureModel::class,
-                      FilmModel::class,
-                      UserFilmModel::class,
-                     ], version = 1)
+@Database(
+    entities = [
+        PictureModel::class,
+        FilmModel::class,
+        UserFilmModel::class,
+    ], version = 1
+)
+@TypeConverters(
+    FilmTypeConverter::class,
+    FilmBrandConverter::class,
+    GrainConverter::class,
+    ContrastConverter::class
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pictureDao(): PictureDao
+    abstract fun filmDao(): FilmDao
 
     companion object {
         @Volatile

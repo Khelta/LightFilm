@@ -60,43 +60,43 @@ val fNumbers: List<Double> = listOf(
 )
 
 val shutterSpeeds: List<Double> = listOf(
-    1.0/8000,
-    1.0/6500,
-    1.0/5500,
-    1.0/4000,
-    1.0/3200,
-    1.0/2500,
-    1.0/2000,
-    1.0/1500,
-    1.0/1250,
-    1.0/1000,
-    1.0/800,
-    1.0/640,
-    1.0/500,
-    1.0/400,
-    1.0/320,
-    1.0/250,
-    1.0/200,
-    1.0/180,
-    1.0/125,
-    1.0/100,
-    1.0/80,
-    1.0/60,
-    1.0/50,
-    1.0/40,
-    1.0/30,
-    1.0/25,
-    1.0/20,
-    1.0/15,
+    1.0 / 8000,
+    1.0 / 6500,
+    1.0 / 5500,
+    1.0 / 4000,
+    1.0 / 3200,
+    1.0 / 2500,
+    1.0 / 2000,
+    1.0 / 1500,
+    1.0 / 1250,
+    1.0 / 1000,
+    1.0 / 800,
+    1.0 / 640,
+    1.0 / 500,
+    1.0 / 400,
+    1.0 / 320,
+    1.0 / 250,
+    1.0 / 200,
+    1.0 / 180,
+    1.0 / 125,
+    1.0 / 100,
+    1.0 / 80,
+    1.0 / 60,
+    1.0 / 50,
+    1.0 / 40,
+    1.0 / 30,
+    1.0 / 25,
+    1.0 / 20,
+    1.0 / 15,
     -1.0,
     -1.0,
-    1.0/8,
+    1.0 / 8,
     -1.0,
     -1.0,
-    1.0/4,
+    1.0 / 4,
     -1.0,
     -1.0,
-    1.0/2,
+    1.0 / 2,
     -1.0,
     -1.0,
     1.0,
@@ -120,6 +120,10 @@ val shutterSpeeds: List<Double> = listOf(
     60.0
 )
 
+interface ReadableEnum {
+    val readable: String
+}
+
 enum class Scene {
     FILMLIST,
     PICTURELIST,
@@ -128,7 +132,7 @@ enum class Scene {
     FILMCREATION
 }
 
-enum class Contrast(val readable: String){
+enum class Contrast(override val readable: String) : ReadableEnum {
     CUSTOM("Custom"),
     LOW("Low"),
     LOW_MEDIUM("Low-Medium"),
@@ -138,7 +142,7 @@ enum class Contrast(val readable: String){
     VERY_HIGH("Very High")
 }
 
-enum class Grain(val readable: String) {
+enum class Grain(override val readable: String) : ReadableEnum {
     CUSTOM("Custom"),
     VERY_FINE("Very Fine"),
     FINE("Fine"),
@@ -147,7 +151,7 @@ enum class Grain(val readable: String) {
     STRONG("Strong")
 }
 
-enum class FilmType(val readable: String){
+enum class FilmType(override val readable: String) : ReadableEnum {
     CUSTOM("Custom"),
     COLOR_NEGATIVE("Color Negative"),
     BLACK_AND_WHITE("Black & White"),
@@ -155,15 +159,15 @@ enum class FilmType(val readable: String){
     BLACK_AND_WHITE_SLIDE("Black & White Slide")
 }
 
-enum class FilmBrand(val readable: String){
+enum class FilmBrand(override val readable: String) : ReadableEnum {
     CUSTOM("Custom"),
     ADOX("ADOX"),
     AGFA("AGFA"),
-    CINESTILL("CineStill"),
+    CINESTILL("Cinestill"),
     FOMAPAN("Fomapan"),
     FUJIFILM("Fujifilm"),
     ILFORD("Ilford"),
     KENTMERE("Kentmere"),
     KODAK("Kodak"),
-    LOMOGRAPHY("Lomography");
+    LOMOGRAPHY("Lomography")
 }

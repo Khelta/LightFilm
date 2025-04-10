@@ -18,11 +18,11 @@ data class PictureModel(
     @ColumnInfo(name = "iso") val iso: Int
 )
 
- @Entity(tableName = "user_film")
- data class UserFilmModel(
-     @PrimaryKey(autoGenerate = true) val uid: Int?,
-     @ColumnInfo(name = "title") val title: String
- )
+@Entity(tableName = "user_film")
+data class UserFilmModel(
+    @PrimaryKey(autoGenerate = true) val uid: Int?,
+    @ColumnInfo(name = "title") val title: String
+)
 
 @Entity(tableName = "film")
 data class FilmModel(
