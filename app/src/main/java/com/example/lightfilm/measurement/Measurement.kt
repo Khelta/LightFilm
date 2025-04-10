@@ -67,7 +67,8 @@ fun Measurement(modifier: Modifier = Modifier) {
     }
 
     fun handleEV(
-        evValue: Double, apertureValue: Double, shutterSpeedValue: Double) {
+        evValue: Double, apertureValue: Double, shutterSpeedValue: Double
+    ) {
         exposureValue = applyISOandND(
             evValue, isoSensitivityOptions[selectedIsoIndex], ndSensitivityOptions[selectedNDIndex]
         )

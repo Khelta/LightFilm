@@ -119,6 +119,6 @@ fun CrosshairItem(
 
 @Preview
 @Composable
-fun CrosshairItemPreview(){
+fun CrosshairItemPreview() {
     CrosshairItem(1.0, 1.0)
 }

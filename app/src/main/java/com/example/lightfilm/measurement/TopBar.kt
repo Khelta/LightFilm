@@ -132,7 +132,9 @@ fun ValueSelectionDialog(
                                         value.toDouble()
                                     ) else
                                         if (value == 0) log2(selectionItems[currentIndex].toDouble())
-                                        else log2(selectionItems[currentIndex].toDouble()) - log2(value.toDouble())
+                                        else log2(selectionItems[currentIndex].toDouble()) - log2(
+                                            value.toDouble()
+                                        )
                             val sign =
                                 if (evValue >= 0) "+"
                                 else ""

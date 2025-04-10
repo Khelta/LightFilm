@@ -37,9 +37,11 @@ fun CameraCaptureButton(
 ) {
     IconButton(
         onClick = {
-            onImageCaptureClick(imageCapture = imageCapture,
+            onImageCaptureClick(
+                imageCapture = imageCapture,
                 applicationContext = context,
-                onEVCalculated = handleEV)
+                onEVCalculated = handleEV
+            )
         },
         modifier = Modifier
             .size(70.dp)
@@ -64,8 +66,8 @@ fun CameraCaptureButton(
                     if (exposureValue != -999.0) {
                         Text(
                             String.format(
-                                "%.1f", exposureValue
-                                , Modifier.align(Alignment.CenterHorizontally))
+                                "%.1f", exposureValue, Modifier.align(Alignment.CenterHorizontally)
+                            )
                         )
                         Text("EV", Modifier.align(Alignment.CenterHorizontally))
                     }

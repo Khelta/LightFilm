@@ -117,8 +117,17 @@ fun onImageCaptureClick(
 
             val file = File(applicationContext.filesDir, LocalDateTime.now().toString() + ".png")
             FileOutputStream(file).use { outputstream ->
-                val rotationMatrix = Matrix().apply{postRotate(imageInfo.rotationDegrees.toFloat())}
-                val rotatedBitmap = Bitmap.createBitmap(image.toBitmap(), 0, 0, image.width, image.height, rotationMatrix, true)
+                val rotationMatrix =
+                    Matrix().apply { postRotate(imageInfo.rotationDegrees.toFloat()) }
+                val rotatedBitmap = Bitmap.createBitmap(
+                    image.toBitmap(),
+                    0,
+                    0,
+                    image.width,
+                    image.height,
+                    rotationMatrix,
+                    true
+                )
                 rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputstream)
             }
             // TODO Save image metadata and connect to film and picture
