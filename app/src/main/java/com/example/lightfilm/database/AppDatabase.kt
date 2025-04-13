@@ -12,6 +12,7 @@ import com.example.lightfilm.database.converter.FilmTypeConverter
 import com.example.lightfilm.database.converter.GrainConverter
 import com.example.lightfilm.database.dao.FilmDao
 import com.example.lightfilm.database.dao.PictureDao
+import com.example.lightfilm.database.dao.UserFilmDao
 
 @Database(
     entities = [
@@ -29,6 +30,7 @@ import com.example.lightfilm.database.dao.PictureDao
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pictureDao(): PictureDao
     abstract fun filmDao(): FilmDao
+    abstract fun userFilmDao(): UserFilmDao
 
     companion object {
         @Volatile
