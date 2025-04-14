@@ -11,7 +11,7 @@ import com.example.lightfilm.Grain
 
 @Entity(tableName = "picture")
 data class PictureModel(
-    @PrimaryKey(autoGenerate = true) val uid: Int?,
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     @ColumnInfo(name = "datetime") val datetime: Int,
     @ColumnInfo(name = "aperture") val aperture: Double,
     @ColumnInfo(name = "shutterspeed") val shutterspeed: Double,
@@ -20,13 +20,14 @@ data class PictureModel(
 
 @Entity(tableName = "user_film")
 data class UserFilmModel(
-    @PrimaryKey(autoGenerate = true) val uid: Int?,
-    @ColumnInfo(name = "title") val title: String
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
+    @ColumnInfo(name = "title") val title: String? = null,
+    @ColumnInfo(name = "film_id") val film_id: Int? = null
 )
 
 @Entity(tableName = "film")
 data class FilmModel(
-    @PrimaryKey(autoGenerate = true) val uid: Int?,
+    @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "type") val type: FilmType,
     @ColumnInfo(name = "brand") val brand: FilmBrand,

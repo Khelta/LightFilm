@@ -30,18 +30,21 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import com.example.lightfilm.database.UserFilmModel
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
+import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
 import com.example.lightfilm.measurement.Measurement
 import com.example.lightfilm.organizing.FilmCreation
-import com.example.lightfilm.organizing.FilmList
 import com.example.lightfilm.organizing.PictureDetails
 import com.example.lightfilm.organizing.PictureList
+import com.example.lightfilm.organizing.UserFilmList
 import com.example.lightfilm.ui.theme.LightFilmTheme
 
 class MainActivity : ComponentActivity() {
     private val pictureViewmodel: PictureViewmodel by viewModels()
     private val filmViewmodel: FilmViewmodel by viewModels()
+    private val userFilmViewmodel: UserFilmViewmodel by viewModels()
 
     private val cameraPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -81,7 +84,8 @@ class MainActivity : ComponentActivity() {
                     MyApp(
                         Modifier.padding(innerPadding),
                         pictureViewmodel,
-                        filmViewmodel
+                        filmViewmodel,
+                        userFilmViewmodel
                     )
                 }
             }
@@ -94,7 +98,8 @@ class MainActivity : ComponentActivity() {
 fun MyApp(
     modifier: Modifier = Modifier,
     pictureViewmodel: PictureViewmodel,
-    filmViewmodel: FilmViewmodel
+    filmViewmodel: FilmViewmodel,
+    userFilmViewmodel: UserFilmViewmodel
 ) {
 
 
@@ -103,9 +108,16 @@ fun MyApp(
     var selectedPicture: Int by rememberSaveable { mutableIntStateOf(value = -1) }
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
-    fun handleFilmClick(filmId: Int) {
-        selectedFilm = filmId
+    fun handleUserFilmClick(userFilmId: Int) {
+        selectedFilm = userFilmId
         activeScene = Scene.PICTURELIST
+    }
+
+    fun handleUserFilmCreation(filmId: Int) {
+        val userFilmInstance = UserFilmModel(film_id = filmId)
+        userFilmViewmodel.insert(userFilmInstance)
+
+        activeScene = Scene.FILMLIST
     }
 
     fun handlePictureClick(pictureId: Int) {
@@ -141,6 +153,7 @@ fun MyApp(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
@@ -208,7 +221,11 @@ fun MyApp(
             when (activeScene) {
                 Scene.MEASUREMENTS -> Measurement()
 
-                Scene.FILMLIST -> FilmList(onFilmClick = ::handleFilmClick)
+                Scene.FILMLIST -> UserFilmList(
+                    userFilmViewmodel,
+                    filmViewmodel,
+                    onFilmClick = ::handleUserFilmClick
+                )
 
                 Scene.PICTURELIST -> PictureList(
                     pictureViewmodel,
@@ -217,7 +234,10 @@ fun MyApp(
 
                 Scene.PICTUREDETAILS -> PictureDetails(pictureViewmodel, selectedPicture)
 
-                Scene.FILMCREATION -> FilmCreation(viewmodel = filmViewmodel)
+                Scene.FILMCREATION -> FilmCreation(
+                    viewmodel = filmViewmodel,
+                    onFilmSelected = ::handleUserFilmCreation
+                )
             }
         }
     }

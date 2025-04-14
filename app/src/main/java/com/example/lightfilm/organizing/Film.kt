@@ -3,7 +3,6 @@ package com.example.lightfilm.organizing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,21 +12,31 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.lightfilm.ui.theme.LightFilmTheme
+import com.example.lightfilm.database.viewmodel.FilmViewmodel
+import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
 
 @Composable
-fun Film(
+fun UserFilm(
     modifier: Modifier = Modifier,
-    filmTitle: String = "Example",
-    id: Int = -1,
+    filmViewmodel: FilmViewmodel,
+    userFilmViewmodel: UserFilmViewmodel,
+    userFilmId: Int = -1,
     onFilmClick: (Int) -> Unit = {}
 ) {
+    val userFilms = userFilmViewmodel.allUserFilms.observeAsState(emptyList())
+    val films = filmViewmodel.allFilms.observeAsState(emptyList())
+
+    val userFilm = userFilms.value.find { it.uid == userFilmId }
+
+    val film = films.value.find { it.uid == userFilm?.film_id }
+    val filmTitle = userFilm?.title ?: film?.name ?: ""
+
     Surface(
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.clickable { onFilmClick(id) }) {
+        modifier = modifier.clickable { onFilmClick(userFilmId) }) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -36,27 +45,29 @@ fun Film(
         ) {
             // Titel
             Text(
-                text = "$id - $filmTitle",
+                text = "$userFilmId - $filmTitle",
             )
         }
     }
 }
 
 @Composable
-fun FilmList(listItems: List<String> = listOf("a", "b", "c"), onFilmClick: (Int) -> Unit = {}) {
+fun UserFilmList(
+    userFilmViewmodel: UserFilmViewmodel,
+    filmViewmodel: FilmViewmodel,
+    onFilmClick: (Int) -> Unit = {}
+) {
+    val allUserFilms = userFilmViewmodel.allUserFilms.observeAsState(emptyList())
+
     LazyColumn {
-        itemsIndexed(listItems) { index, a ->
-            Film(filmTitle = a, id = index + 1, onFilmClick = onFilmClick)
+        itemsIndexed(allUserFilms.value) { index, userFilm ->
+            UserFilm(
+                filmViewmodel = filmViewmodel,
+                userFilmViewmodel = userFilmViewmodel,
+                userFilmId = userFilm.uid,
+                onFilmClick = onFilmClick
+            )
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
         }
-    }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun FilmPreview() {
-    LightFilmTheme {
-        Film(Modifier.fillMaxSize(), "Hallo")
     }
 }

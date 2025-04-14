@@ -21,12 +21,16 @@ import androidx.compose.ui.unit.dp
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 
 @Composable
-fun FilmCreation(modifier: Modifier = Modifier, viewmodel: FilmViewmodel) {
+fun FilmCreation(
+    modifier: Modifier = Modifier,
+    viewmodel: FilmViewmodel,
+    onFilmSelected: (Int) -> Unit
+) {
     val films = viewmodel.allFilms.observeAsState(emptyList())
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(8.dp),
         contentPadding = PaddingValues(8.dp),
@@ -34,19 +38,20 @@ fun FilmCreation(modifier: Modifier = Modifier, viewmodel: FilmViewmodel) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(films.value) { film ->
-            FilmItem(filmName = film.name)
+            FilmItem(filmId = film.uid, filmName = film.name, onClick = onFilmSelected)
         }
     }
 }
 
 @Composable
-fun FilmItem(modifier: Modifier = Modifier, filmName: String) {
+fun FilmItem(modifier: Modifier = Modifier, filmId: Int, filmName: String, onClick: (Int) -> Unit) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1f) // makes it a square card
+            .aspectRatio(1f)
             .padding(4.dp),
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
+        onClick = { onClick(filmId) }
     ) {
         Box(
             modifier = Modifier
