@@ -11,7 +11,7 @@ import com.example.lightfilm.database.UserFilmModel
 @Dao
 interface UserFilmDao {
 
-    @Query("SELECT * FROM film")
+    @Query("SELECT * FROM user_film")
     fun getAll(): LiveData<List<UserFilmModel>>
 
     @Insert
