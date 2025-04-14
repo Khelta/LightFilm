@@ -253,6 +253,9 @@ fun MyApp(
 
                 Scene.PICTURELIST -> PictureList(
                     pictureViewmodel,
+                    filmViewmodel,
+                    userFilmViewmodel,
+                    selectedFilm,
                     onPictureClick = ::handlePictureClick
                 )
 
