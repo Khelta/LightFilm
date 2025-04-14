@@ -24,9 +24,9 @@ class UserFilmRepository(application: Application) {
         }
     }
 
-    suspend fun delete(userFilm: UserFilmModel) {
+    suspend fun delete(userFilm: UserFilmModel?) {
         withContext(Dispatchers.IO) {
-            userFilmDao.delete(userFilm)
+            userFilm?.let { userFilmDao.delete(userFilm) }
         }
     }
 }

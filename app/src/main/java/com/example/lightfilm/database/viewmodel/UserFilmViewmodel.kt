@@ -25,7 +25,7 @@ class UserFilmViewmodel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun delete(userFilm: UserFilmModel) {
+    fun delete(userFilm: UserFilmModel?) {
         CoroutineScope(Dispatchers.Main).launch {
             repository.delete(userFilm)
         }

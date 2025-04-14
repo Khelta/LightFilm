@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -102,6 +103,7 @@ fun MyApp(
     userFilmViewmodel: UserFilmViewmodel
 ) {
 
+    // TODO Icon descriptions
 
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
     var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
@@ -117,6 +119,13 @@ fun MyApp(
         val userFilmInstance = UserFilmModel(film_id = filmId)
         userFilmViewmodel.insert(userFilmInstance)
 
+        activeScene = Scene.FILMLIST
+    }
+
+    fun handleUserFilmDeletion(userFilmId: Int) {
+        userFilmViewmodel.delete(userFilmViewmodel.allUserFilms.value?.find { it.uid == userFilmId })
+
+        selectedFilm = -1
         activeScene = Scene.FILMLIST
     }
 
@@ -153,13 +162,13 @@ fun MyApp(
     }
 
     Scaffold(
-        modifier = modifier,
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
-                ), title = {
+                ),
+                title = {
                     when (activeScene) {
                         Scene.FILMLIST -> {
                             Text("LightFilm")
@@ -178,7 +187,8 @@ fun MyApp(
                         }
                     }
 
-                }, navigationIcon = {
+                },
+                navigationIcon = {
                     if (activeScene != Scene.FILMLIST) {
                         IconButton(onClick = ::handleArrowBackClick) {
                             Icon(
@@ -187,8 +197,22 @@ fun MyApp(
                             )
                         }
                     }
+                },
+                actions = {
+                    when (activeScene) {
+                        Scene.PICTURELIST -> {
+                            IconButton(onClick = { handleUserFilmDeletion(selectedFilm) }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = ""
+                                )
+                            }
+                        }
 
-                })
+                        else -> {}
+                    }
+                }
+            )
         },
         floatingActionButton = {
             if (activeScene in listOf<Scene>(
