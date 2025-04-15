@@ -1,5 +1,6 @@
 package com.example.lightfilm.measurement
 
+import android.content.Context
 import android.content.res.Configuration
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -24,26 +25,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.applyISOandND
 import com.example.lightfilm.calculateEV
+import com.example.lightfilm.database.PictureModel
+import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
-import com.example.lightfilm.ui.theme.LightFilmTheme
+import java.io.File
 
+// TODO Autoset ISO based on selected film
+// TODO Disable UI when preview image waits being saved or rejected
 
 @Composable
-fun Measurement(modifier: Modifier = Modifier) {
+fun Measurement(modifier: Modifier = Modifier, viewmodel: PictureViewmodel) {
     var showIsoOverlay by remember { mutableStateOf(false) }
     var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
     var showNDOverlay by remember { mutableStateOf(false) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
+    var imagePath by rememberSaveable { mutableStateOf("") }
+
     var lensFacing by rememberSaveable { mutableIntStateOf(CameraSelector.LENS_FACING_BACK) }
     val imageCapture = remember { ImageCapture.Builder().build() }
-    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
@@ -67,13 +71,14 @@ fun Measurement(modifier: Modifier = Modifier) {
     }
 
     fun handleEV(
-        evValue: Double, apertureValue: Double, shutterSpeedValue: Double
+        evValue: Double, apertureValue: Double, shutterSpeedValue: Double, imagePathValue: String
     ) {
         exposureValue = applyISOandND(
             evValue, isoSensitivityOptions[selectedIsoIndex], ndSensitivityOptions[selectedNDIndex]
         )
         aperture = apertureValue
         shutterSpeed = shutterSpeedValue
+        imagePath = imagePathValue
         println("EV: $evValue, Aperture: f$apertureValue, Shutterspeed: $shutterSpeedValue")
     }
 
@@ -88,6 +93,31 @@ fun Measurement(modifier: Modifier = Modifier) {
         )
         println(exposureValue)
         // TODO Update fstoptable
+    }
+
+    fun handleImageSaving(
+        selectedApertureValue: Double? = null,
+        selectedShutterSpeedValue: Double? = null
+    ) {
+        //TODO implement selection of aperture and shutterspeed
+        val picture = PictureModel(
+            pathToFile = imagePath,
+            internalAperture = aperture,
+            internalShutterSpeed = shutterSpeed,
+            internalIso = -1,
+            selectedAperture = selectedApertureValue,
+            selectedShutterSpeed = selectedShutterSpeedValue,
+            selectedIso = isoSensitivityOptions[selectedIsoIndex]
+        )
+        viewmodel.insert(picture)
+
+        imagePath = ""
+    }
+
+    fun handleImageReject(context: Context) {
+        val file = File(context.filesDir, imagePath)
+        file.delete()
+        imagePath = ""
     }
 
     fun switchLens() {
@@ -142,7 +172,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                             { showNDOverlay = true },
                             imageCapture,
                             lensFacing,
-                            zoomSliderValue
+                            zoomSliderValue,
+                            imagePath
                         )
                     }
                 }
@@ -158,7 +189,14 @@ fun Measurement(modifier: Modifier = Modifier) {
                 )
 
                 CameraCaptureButtonBar(
-                    true, imageCapture, context, exposureValue, ::handleEV, ::switchLens
+                    true,
+                    imageCapture,
+                    exposureValue,
+                    ::handleEV,
+                    ::switchLens,
+                    ::handleImageSaving,
+                    ::handleImageReject,
+                    imagePath
                 )
             }
         } else {
@@ -179,7 +217,8 @@ fun Measurement(modifier: Modifier = Modifier) {
                             { showNDOverlay = true },
                             imageCapture,
                             lensFacing,
-                            zoomSliderValue
+                            zoomSliderValue,
+                            imagePath
                         )
                     }
                 }
@@ -194,25 +233,16 @@ fun Measurement(modifier: Modifier = Modifier) {
                 )
 
                 CameraCaptureButtonBar(
-                    false, imageCapture, context, exposureValue, ::handleEV, ::switchLens
+                    false,
+                    imageCapture,
+                    exposureValue,
+                    ::handleEV,
+                    ::switchLens,
+                    ::handleImageSaving,
+                    ::handleImageReject,
+                    imagePath
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true, heightDp = 500)
-@Composable
-fun MeasurementPreview() {
-    LightFilmTheme {
-        Measurement()
-    }
-}
-
-@Preview(showBackground = true, heightDp = 500, widthDp = 1000)
-@Composable
-fun MeasurementLandscapePreview() {
-    LightFilmTheme {
-        Measurement()
     }
 }

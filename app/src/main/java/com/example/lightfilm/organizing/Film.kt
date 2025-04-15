@@ -31,7 +31,7 @@ fun UserFilm(
 
     val userFilm = userFilms.value.find { it.uid == userFilmId }
 
-    val film = films.value.find { it.uid == userFilm?.film_id }
+    val film = films.value.find { it.uid == userFilm?.filmId }
     val filmTitle = userFilm?.title ?: film?.name ?: ""
 
     Surface(

@@ -85,7 +85,7 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
 fun onImageCaptureClick(
     imageCapture: ImageCapture,
     applicationContext: Context,
-    onEVCalculated: (Double, Double, Double) -> Unit
+    onEVCalculated: (Double, Double, Double, String) -> Unit
 ) {
     val callbackObject = object : ImageCapture.OnImageCapturedCallback() {
         override fun onError(error: ImageCaptureException) {
@@ -111,11 +111,8 @@ fun onImageCaptureClick(
                 ExifInterface.TAG_F_NUMBER
             )?.toDouble() ?: 0.0
 
-            println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
-            val ev = calculateSimpleEV(aperture, exposureTime)
-            onEVCalculated(ev, aperture, exposureTime)
-
-            val file = File(applicationContext.filesDir, LocalDateTime.now().toString() + ".png")
+            val fileName = LocalDateTime.now().toString() + ".png"
+            val file = File(applicationContext.filesDir, fileName)
             FileOutputStream(file).use { outputstream ->
                 val rotationMatrix =
                     Matrix().apply { postRotate(imageInfo.rotationDegrees.toFloat()) }
@@ -130,6 +127,11 @@ fun onImageCaptureClick(
                 )
                 rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputstream)
             }
+
+            println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
+            val ev = calculateSimpleEV(aperture, exposureTime)
+            onEVCalculated(ev, aperture, exposureTime, fileName)
+
             // TODO Save image metadata and connect to film and picture
             image.close()
         }

@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.QuestionMark
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.onImageCaptureClick
 
@@ -33,7 +36,7 @@ fun CameraCaptureButton(
     imageCapture: ImageCapture,
     context: Context,
     exposureValue: Double,
-    handleEV: (Double, Double, Double) -> Unit
+    handleEV: (Double, Double, Double, String) -> Unit
 ) {
     IconButton(
         onClick = {
@@ -92,15 +95,31 @@ fun CameraOptionButton(onClick: () -> Unit, imageVector: ImageVector, contentDes
 fun CameraCaptureButtonContent(
     isPortrait: Boolean,
     imageCapture: ImageCapture,
-    context: Context,
     exposureValue: Double,
-    handleEV: (Double, Double, Double) -> Unit,
-    switchLens: () -> Unit
+    handleEV: (Double, Double, Double, String) -> Unit,
+    switchLens: () -> Unit,
+    handleImageSaving: () -> Unit,
+    handleImageRejection: (Context) -> Unit,
+    imagePath: String = ""
 ) {
+    val context = LocalContext.current
     val lensSwitchButton: @Composable () -> Unit =
-        { CameraOptionButton(switchLens, Icons.Filled.Cached, "Lens switching") }
+        {
+            if (imagePath != "") CameraOptionButton(
+                { handleImageRejection(context) },
+                Icons.Filled.Delete,
+                "Delete preview image"
+            ) else CameraOptionButton(switchLens, Icons.Filled.Cached, "Lens switching")
+        }
     val settingsButton: @Composable () -> Unit =
-        { CameraOptionButton({/*TODO*/ }, Icons.Filled.Settings, "Settings") }
+        {
+            if (imagePath != "") CameraOptionButton(
+                { handleImageSaving() },
+                Icons.Filled.Save,
+                "Save preview image"
+            )
+            else CameraOptionButton({/*TODO*/ }, Icons.Filled.QuestionMark, "")
+        }
 
     if (isPortrait) lensSwitchButton() else settingsButton()
     CameraCaptureButton(imageCapture, context, exposureValue, handleEV)
@@ -112,10 +131,12 @@ fun CameraCaptureButtonContent(
 fun CameraCaptureButtonBar(
     isPortrait: Boolean,
     imageCapture: ImageCapture,
-    context: Context,
     exposureValue: Double,
-    handleEV: (Double, Double, Double) -> Unit,
-    switchLens: () -> Unit
+    handleEV: (Double, Double, Double, String) -> Unit,
+    switchLens: () -> Unit,
+    handleImageSaving: () -> Unit,
+    handleImageRejection: (Context) -> Unit,
+    imagePath: String = ""
 ) {
     Surface(color = MaterialTheme.colorScheme.outline) {
         if (isPortrait) {
@@ -129,10 +150,12 @@ fun CameraCaptureButtonBar(
                 CameraCaptureButtonContent(
                     true,
                     imageCapture,
-                    context,
                     exposureValue,
                     handleEV,
-                    switchLens
+                    switchLens,
+                    handleImageSaving,
+                    handleImageRejection,
+                    imagePath
                 )
             }
         } else {
@@ -146,10 +169,12 @@ fun CameraCaptureButtonBar(
                 CameraCaptureButtonContent(
                     false,
                     imageCapture,
-                    context,
                     exposureValue,
                     handleEV,
-                    switchLens
+                    switchLens,
+                    handleImageSaving,
+                    handleImageRejection,
+                    imagePath
                 )
             }
         }

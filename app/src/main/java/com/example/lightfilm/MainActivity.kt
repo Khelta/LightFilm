@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -116,7 +117,7 @@ fun MyApp(
     }
 
     fun handleUserFilmCreation(filmId: Int) {
-        val userFilmInstance = UserFilmModel(film_id = filmId)
+        val userFilmInstance = UserFilmModel(filmId = filmId)
         userFilmViewmodel.insert(userFilmInstance)
 
         activeScene = Scene.FILMLIST
@@ -209,6 +210,15 @@ fun MyApp(
                             }
                         }
 
+                        Scene.MEASUREMENTS -> {
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+
                         else -> {}
                     }
                 }
@@ -243,7 +253,7 @@ fun MyApp(
         }) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
             when (activeScene) {
-                Scene.MEASUREMENTS -> Measurement()
+                Scene.MEASUREMENTS -> Measurement(viewmodel = pictureViewmodel)
 
                 Scene.FILMLIST -> UserFilmList(
                     userFilmViewmodel,

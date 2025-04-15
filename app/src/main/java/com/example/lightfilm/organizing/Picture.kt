@@ -63,7 +63,7 @@ fun PictureList(
     val userFilms = userFilmViewmodel.allUserFilms.observeAsState(emptyList())
 
     val currentUserFilm = userFilms.value.find { it.uid == userFilmId }
-    val currentFilm = filmViewmodel.allFilms.value?.find { it.uid == currentUserFilm?.film_id }
+    val currentFilm = filmViewmodel.allFilms.value?.find { it.uid == currentUserFilm?.filmId }
 
     val filmType = currentFilm?.type?.readable ?: ""
     val contrast = currentFilm?.contrast?.readable ?: ""
@@ -133,7 +133,7 @@ fun PictureList(
 fun PictureDetails(viewmodel: PictureViewmodel, pictureIndex: Int) {
     val pictures = viewmodel.allPictures.observeAsState(emptyList())
 
-    val iso = pictures.value[pictureIndex].iso
+    val iso = pictures.value[pictureIndex].selectedIso
     val uid = pictures.value[pictureIndex].uid
     Row {
         Column {

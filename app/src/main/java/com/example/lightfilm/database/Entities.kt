@@ -12,17 +12,20 @@ import com.example.lightfilm.Grain
 @Entity(tableName = "picture")
 data class PictureModel(
     @PrimaryKey(autoGenerate = true) val uid: Int = 0,
-    @ColumnInfo(name = "datetime") val datetime: Int,
-    @ColumnInfo(name = "aperture") val aperture: Double,
-    @ColumnInfo(name = "shutterspeed") val shutterspeed: Double,
-    @ColumnInfo(name = "iso") val iso: Int
+    @ColumnInfo(name = "path_to_file") val pathToFile: String,
+    @ColumnInfo(name = "internal_aperture") val internalAperture: Double,
+    @ColumnInfo(name = "internal_shutterspeed") val internalShutterSpeed: Double,
+    @ColumnInfo(name = "internal_iso") val internalIso: Int,
+    @ColumnInfo(name = "selected_aperture") val selectedAperture: Double? = null,
+    @ColumnInfo(name = "selected_shutterspeed") val selectedShutterSpeed: Double? = null,
+    @ColumnInfo(name = "selected_iso") val selectedIso: Int? = null
 )
 
 @Entity(tableName = "user_film")
 data class UserFilmModel(
     @PrimaryKey(autoGenerate = true) val uid: Int = 0,
     @ColumnInfo(name = "title") val title: String? = null,
-    @ColumnInfo(name = "film_id") val film_id: Int? = null
+    @ColumnInfo(name = "film_id") val filmId: Int? = null
 )
 
 @Entity(tableName = "film")
