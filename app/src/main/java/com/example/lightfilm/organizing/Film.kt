@@ -1,6 +1,5 @@
 package com.example.lightfilm.organizing
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,13 +34,12 @@ fun UserFilm(
     val filmTitle = userFilm?.title ?: film?.name ?: ""
 
     Surface(
-        color = MaterialTheme.colorScheme.primary,
+        color = MaterialTheme.colorScheme.secondaryContainer,
         modifier = modifier.clickable { onFilmClick(userFilmId) }) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .background(MaterialTheme.colorScheme.primary)
         ) {
             // Titel
             Text(
