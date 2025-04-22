@@ -34,6 +34,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -99,8 +104,18 @@ fun Picture(
                 contentDescription = "User-generated preview image",
                 modifier = Modifier
                     .height(imageHeightDp)
-                    .width(120.dp)
-                    .align(Alignment.CenterVertically),
+                    .width(150.dp)
+                    .align(Alignment.CenterVertically)
+                    .graphicsLayer { alpha = 0.99f }
+                    .drawWithContent {
+                        drawContent()
+                        val fadeBrush = Brush.horizontalGradient(
+                            colors = listOf(Color.White, Color.Transparent),
+                            startX = 0f,
+                            endX = size.width - 0.2f * size.width
+                        )
+                        drawRect(brush = fadeBrush, blendMode = BlendMode.DstOut)
+                    },
                 contentScale = ContentScale.Crop
             )
         }
