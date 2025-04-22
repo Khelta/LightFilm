@@ -1,6 +1,5 @@
 package com.example.lightfilm.measurement
 
-import android.graphics.BitmapFactory
 import androidx.camera.core.ImageCapture
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -28,13 +27,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.CameraPreviewScreen
+import com.example.lightfilm.imageFileToBitmap
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
-import java.io.File
 import kotlin.math.log2
 
 @Composable
@@ -214,11 +212,7 @@ fun CapturedImage(
     fileName: String
 ) {
     val context = LocalContext.current
-
-    val file = File(context.filesDir, fileName)
-    val filePath = file.absolutePath
-
-    val bitmap = BitmapFactory.decodeFile(filePath).asImageBitmap()
+    val bitmap = imageFileToBitmap(context, fileName)
 
     Surface(
         shape = RoundedCornerShape(15),

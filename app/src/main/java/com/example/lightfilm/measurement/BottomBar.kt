@@ -36,7 +36,7 @@ fun CameraCaptureButton(
     imageCapture: ImageCapture,
     context: Context,
     exposureValue: Double,
-    handleEV: (Double, Double, Double, String) -> Unit
+    handleEV: (Double, Double, Double, Int, String) -> Unit
 ) {
     IconButton(
         onClick = {
@@ -96,14 +96,14 @@ fun CameraCaptureButtonContent(
     isPortrait: Boolean,
     imageCapture: ImageCapture,
     exposureValue: Double,
-    handleEV: (Double, Double, Double, String) -> Unit,
+    handleEV: (Double, Double, Double, Int, String) -> Unit,
     switchLens: () -> Unit,
     handleImageSaving: () -> Unit,
     handleImageRejection: (Context) -> Unit,
     imagePath: String = ""
 ) {
     val context = LocalContext.current
-    val lensSwitchButton: @Composable () -> Unit =
+    val leftButton: @Composable () -> Unit =
         {
             if (imagePath != "") CameraOptionButton(
                 { handleImageRejection(context) },
@@ -111,7 +111,7 @@ fun CameraCaptureButtonContent(
                 "Delete preview image"
             ) else CameraOptionButton(switchLens, Icons.Filled.Cached, "Lens switching")
         }
-    val settingsButton: @Composable () -> Unit =
+    val rightButton: @Composable () -> Unit =
         {
             if (imagePath != "") CameraOptionButton(
                 { handleImageSaving() },
@@ -121,9 +121,9 @@ fun CameraCaptureButtonContent(
             else CameraOptionButton({/*TODO*/ }, Icons.Filled.QuestionMark, "")
         }
 
-    if (isPortrait) lensSwitchButton() else settingsButton()
+    if (isPortrait) leftButton() else rightButton()
     CameraCaptureButton(imageCapture, context, exposureValue, handleEV)
-    if (isPortrait) settingsButton() else lensSwitchButton()
+    if (isPortrait) rightButton() else leftButton()
 
 }
 
@@ -132,7 +132,7 @@ fun CameraCaptureButtonBar(
     isPortrait: Boolean,
     imageCapture: ImageCapture,
     exposureValue: Double,
-    handleEV: (Double, Double, Double, String) -> Unit,
+    handleEV: (Double, Double, Double, Int, String) -> Unit,
     switchLens: () -> Unit,
     handleImageSaving: () -> Unit,
     handleImageRejection: (Context) -> Unit,

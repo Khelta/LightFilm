@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.time.LocalDateTime
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -85,7 +84,7 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
 fun onImageCaptureClick(
     imageCapture: ImageCapture,
     applicationContext: Context,
-    onEVCalculated: (Double, Double, Double, String) -> Unit
+    onEVCalculated: (Double, Double, Double, Int, String) -> Unit
 ) {
     val callbackObject = object : ImageCapture.OnImageCapturedCallback() {
         override fun onError(error: ImageCaptureException) {
@@ -111,7 +110,8 @@ fun onImageCaptureClick(
                 ExifInterface.TAG_F_NUMBER
             )?.toDouble() ?: 0.0
 
-            val fileName = LocalDateTime.now().toString() + ".png"
+            val currentDateTime = System.currentTimeMillis()
+            val fileName = "$currentDateTime.png"
             val file = File(applicationContext.filesDir, fileName)
             FileOutputStream(file).use { outputstream ->
                 val rotationMatrix =
@@ -130,7 +130,7 @@ fun onImageCaptureClick(
 
             println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
             val ev = calculateSimpleEV(aperture, exposureTime)
-            onEVCalculated(ev, aperture, exposureTime, fileName)
+            onEVCalculated(ev, aperture, exposureTime, iso, fileName)
 
             // TODO Save image metadata and connect to film and picture
             image.close()

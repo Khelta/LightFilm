@@ -120,6 +120,8 @@ val shutterSpeeds: List<Double> = listOf(
     60.0
 )
 
+val noValueString = " - "
+
 interface ReadableEnum {
     val readable: String
 }

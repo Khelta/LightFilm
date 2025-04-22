@@ -38,7 +38,11 @@ import java.io.File
 // TODO Disable UI when preview image waits being saved or rejected
 
 @Composable
-fun Measurement(modifier: Modifier = Modifier, viewmodel: PictureViewmodel) {
+fun Measurement(
+    modifier: Modifier = Modifier,
+    viewmodel: PictureViewmodel,
+    currentUserFilmId: Int
+) {
     var showIsoOverlay by remember { mutableStateOf(false) }
     var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
     var showNDOverlay by remember { mutableStateOf(false) }
@@ -54,6 +58,7 @@ fun Measurement(modifier: Modifier = Modifier, viewmodel: PictureViewmodel) {
     var exposureValue by rememberSaveable { mutableDoubleStateOf(-999.0) }
     var aperture by rememberSaveable { mutableDoubleStateOf(-1.0) }
     var shutterSpeed by rememberSaveable { mutableDoubleStateOf(-1.0) }
+    var internalIso by rememberSaveable { mutableIntStateOf(-1) }
 
     val exposureSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
     var zoomSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
@@ -71,13 +76,18 @@ fun Measurement(modifier: Modifier = Modifier, viewmodel: PictureViewmodel) {
     }
 
     fun handleEV(
-        evValue: Double, apertureValue: Double, shutterSpeedValue: Double, imagePathValue: String
+        evValue: Double,
+        apertureValue: Double,
+        shutterSpeedValue: Double,
+        internalIsoValue: Int,
+        imagePathValue: String
     ) {
         exposureValue = applyISOandND(
             evValue, isoSensitivityOptions[selectedIsoIndex], ndSensitivityOptions[selectedNDIndex]
         )
         aperture = apertureValue
         shutterSpeed = shutterSpeedValue
+        internalIso = internalIsoValue
         imagePath = imagePathValue
         println("EV: $evValue, Aperture: f$apertureValue, Shutterspeed: $shutterSpeedValue")
     }
@@ -97,17 +107,19 @@ fun Measurement(modifier: Modifier = Modifier, viewmodel: PictureViewmodel) {
 
     fun handleImageSaving(
         selectedApertureValue: Double? = null,
-        selectedShutterSpeedValue: Double? = null
+        selectedShutterSpeedValue: Double? = null,
     ) {
         //TODO implement selection of aperture and shutterspeed
         val picture = PictureModel(
             pathToFile = imagePath,
             internalAperture = aperture,
             internalShutterSpeed = shutterSpeed,
-            internalIso = -1,
+            internalIso = internalIso,
             selectedAperture = selectedApertureValue,
             selectedShutterSpeed = selectedShutterSpeedValue,
-            selectedIso = isoSensitivityOptions[selectedIsoIndex]
+            selectedIso = isoSensitivityOptions[selectedIsoIndex],
+            captureDate = System.currentTimeMillis(),
+            userFilmId = currentUserFilmId
         )
         viewmodel.insert(picture)
 

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -61,8 +62,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        //pictureViewmodel.insert(PictureModel(uid = null, datetime = 0, aperture = 0.0, shutterspeed = 0.0, iso = 0))
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
@@ -176,7 +175,11 @@ fun MyApp(
                         }
 
                         Scene.PICTURELIST -> {
-                            Text("Film selected - $selectedFilm")
+                            val filmId =
+                                userFilmViewmodel.allUserFilms.value?.find { it.uid == selectedFilm }?.filmId
+                            val filmName =
+                                filmViewmodel.allFilms.value?.find { it.uid == filmId }?.name
+                            Text("$selectedFilm - $filmName")
                         }
 
                         Scene.PICTUREDETAILS -> {
@@ -205,6 +208,15 @@ fun MyApp(
                             IconButton(onClick = { handleUserFilmDeletion(selectedFilm) }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+
+                        Scene.PICTUREDETAILS -> {
+                            IconButton(onClick = {/*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
                                     contentDescription = ""
                                 )
                             }
@@ -253,7 +265,10 @@ fun MyApp(
         }) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
             when (activeScene) {
-                Scene.MEASUREMENTS -> Measurement(viewmodel = pictureViewmodel)
+                Scene.MEASUREMENTS -> Measurement(
+                    viewmodel = pictureViewmodel,
+                    currentUserFilmId = selectedFilm
+                )
 
                 Scene.FILMLIST -> UserFilmList(
                     userFilmViewmodel,
