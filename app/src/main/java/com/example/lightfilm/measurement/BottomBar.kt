@@ -256,7 +256,9 @@ fun ApertureShutterSelectionDialog(
                             label = { Text("Shutter speed") },
                             maxLines = 1,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            onValueChange = {},
+                            onValueChange = {
+                                shutterSpeedValue = decimalStringClean(shutterSpeedValue, it)
+                            },
                         )
                     }
                 }
