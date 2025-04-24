@@ -32,9 +32,7 @@ fun FStopTable(aperture: Double = 2.0, ev: Double = 5.0) {
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
-        fNumbers.forEachIndexed() { index, f ->
+        fNumbers.forEachIndexed { index, f ->
             val shutterSpeed =
                 findClosestNumber(shutterSpeeds, getShutterSpeedFromAperture(f, ev, 100))
             CrosshairItem(f, shutterSpeed)
@@ -121,6 +119,6 @@ fun CrosshairItem(
 
 @Preview
 @Composable
-fun CrosshairItemPreview(){
+fun CrosshairItemPreview() {
     CrosshairItem(1.0, 1.0)
 }

@@ -42,22 +42,21 @@ fun findClosestNumber(numbers: List<Double>, target: Double): Double {
 }
 
 fun calculateSimpleEV(aperture: Double, exposureTime: Double): Double {
-    if (aperture > 0.0 && exposureTime > 0.0){
+    if (aperture > 0.0 && exposureTime > 0.0) {
         val ev = log2(aperture.pow(2.0) / exposureTime)
         println("EV: $ev, Aperture: $aperture, exposureTime: $exposureTime")
-        return ev}
-    else
+        return ev
+    } else
         return -999.0
 }
 
-fun applyISOandND(ev: Double, iso: Int, nd: Int): Double{
+fun applyISOandND(ev: Double, iso: Int, nd: Int): Double {
     return ev + log2(iso.toDouble() / 100) - log2(nd.toDouble())
 }
 
-fun calculateEV(aperture: Double, exposureTime: Double, iso: Int, nd: Int): Double{
+fun calculateEV(aperture: Double, exposureTime: Double, iso: Int, nd: Int): Double {
     var ev = calculateSimpleEV(aperture, exposureTime)
-    if (ev != -999.0){
+    if (ev != -999.0) {
         return applyISOandND(ev, iso, nd)
-    }
-    else return -999.0
+    } else return -999.0
 }

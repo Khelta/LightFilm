@@ -1,6 +1,8 @@
 package com.example.lightfilm
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -25,6 +27,8 @@ import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -80,7 +84,7 @@ private suspend fun Context.getCameraProvider(): ProcessCameraProvider =
 fun onImageCaptureClick(
     imageCapture: ImageCapture,
     applicationContext: Context,
-    onEVCalculated: (Double, Double, Double) -> Unit
+    onEVCalculated: (Double, Double, Double, Int, String) -> Unit
 ) {
     val callbackObject = object : ImageCapture.OnImageCapturedCallback() {
         override fun onError(error: ImageCaptureException) {
@@ -89,7 +93,8 @@ fun onImageCaptureClick(
 
         override fun onCaptureSuccess(image: ImageProxy) {
             super.onCaptureSuccess(image)
-            println(image.imageInfo)
+            val imageInfo = image.imageInfo
+            println("imageInfo: $imageInfo")
 
             val bb = image.planes[0].buffer
             val buffer = ByteArray(bb.remaining())
@@ -105,9 +110,30 @@ fun onImageCaptureClick(
                 ExifInterface.TAG_F_NUMBER
             )?.toDouble() ?: 0.0
 
+            val currentDateTime = System.currentTimeMillis()
+            val fileName = "$currentDateTime.png"
+            val file = File(applicationContext.filesDir, fileName)
+            FileOutputStream(file).use { outputstream ->
+                val rotationMatrix =
+                    Matrix().apply { postRotate(imageInfo.rotationDegrees.toFloat()) }
+                val rotatedBitmap = Bitmap.createBitmap(
+                    image.toBitmap(),
+                    0,
+                    0,
+                    image.width,
+                    image.height,
+                    rotationMatrix,
+                    true
+                )
+                rotatedBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputstream)
+            }
+
             println("Exposure time: $exposureTime\nISO: $iso\nAperture: $aperture")
             val ev = calculateSimpleEV(aperture, exposureTime)
-            onEVCalculated(ev, aperture, exposureTime)
+            onEVCalculated(ev, aperture, exposureTime, iso, fileName)
+
+            // TODO Save image metadata and connect to film and picture
+            image.close()
         }
     }
     imageCapture.takePicture(ContextCompat.getMainExecutor(applicationContext), callbackObject)
