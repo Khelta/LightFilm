@@ -26,12 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.example.lightfilm.apertureStringToValue
 import com.example.lightfilm.applyISOandND
 import com.example.lightfilm.calculateEV
 import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
+import com.example.lightfilm.shutterSpeedStringToValue
 import java.io.File
 
 // TODO Autoset ISO based on selected film
@@ -44,8 +46,10 @@ fun Measurement(
     currentUserFilmId: Int
 ) {
     var showIsoOverlay by remember { mutableStateOf(false) }
-    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
     var showNDOverlay by remember { mutableStateOf(false) }
+    var apertureShutterDialogOpen by rememberSaveable { mutableStateOf(false) }
+
+    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var imagePath by rememberSaveable { mutableStateOf("") }
@@ -53,12 +57,16 @@ fun Measurement(
     var lensFacing by rememberSaveable { mutableIntStateOf(CameraSelector.LENS_FACING_BACK) }
     val imageCapture = remember { ImageCapture.Builder().build() }
     val configuration = LocalConfiguration.current
+
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
     var exposureValue by rememberSaveable { mutableDoubleStateOf(-999.0) }
     var aperture by rememberSaveable { mutableDoubleStateOf(-1.0) }
     var shutterSpeed by rememberSaveable { mutableDoubleStateOf(-1.0) }
     var internalIso by rememberSaveable { mutableIntStateOf(-1) }
+
+    var selectedApertureValue by rememberSaveable { mutableStateOf<Double?>(null) }
+    var selectedShutterSpeedValue by rememberSaveable { mutableStateOf<Double?>(null) }
 
     val exposureSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
     var zoomSliderValue by rememberSaveable { mutableFloatStateOf(0.5f) }
@@ -105,11 +113,7 @@ fun Measurement(
         // TODO Update fstoptable
     }
 
-    fun handleImageSaving(
-        selectedApertureValue: Double? = null,
-        selectedShutterSpeedValue: Double? = null,
-    ) {
-        //TODO implement selection of aperture and shutterspeed
+    fun handleImageSaving() {
         val picture = PictureModel(
             pathToFile = imagePath,
             internalAperture = aperture,
@@ -124,6 +128,10 @@ fun Measurement(
         viewmodel.insert(picture)
 
         imagePath = ""
+    }
+
+    fun handleApertureShutterSelectionOpening() {
+        apertureShutterDialogOpen = true
     }
 
     fun handleImageReject(context: Context) {
@@ -163,6 +171,17 @@ fun Measurement(
                 isIsoSelection = false,
                 valueIndex = selectedNDIndex
             )
+        }
+
+        if (apertureShutterDialogOpen) {
+            ApertureShutterSelectionDialog(
+                { apertureShutterDialogOpen = false },
+                { apertureValue, shutterSpeedValue ->
+                    selectedApertureValue = apertureStringToValue(apertureValue)
+                    selectedShutterSpeedValue = shutterSpeedStringToValue(shutterSpeedValue)
+                    apertureShutterDialogOpen = false
+                    handleImageSaving()
+                })
         }
 
         val colorSchemeTopBar = MaterialTheme.colorScheme.outline
@@ -206,7 +225,7 @@ fun Measurement(
                     exposureValue,
                     ::handleEV,
                     ::switchLens,
-                    ::handleImageSaving,
+                    ::handleApertureShutterSelectionOpening,
                     ::handleImageReject,
                     imagePath
                 )
@@ -250,7 +269,7 @@ fun Measurement(
                     exposureValue,
                     ::handleEV,
                     ::switchLens,
-                    ::handleImageSaving,
+                    ::handleApertureShutterSelectionOpening,
                     ::handleImageReject,
                     imagePath
                 )
