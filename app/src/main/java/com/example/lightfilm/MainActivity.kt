@@ -106,9 +106,6 @@ fun MyApp(
     filmViewmodel: FilmViewmodel,
     userFilmViewmodel: UserFilmViewmodel
 ) {
-
-    // TODO Icon descriptions
-
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
     var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
     var selectedPicture: Int by rememberSaveable { mutableIntStateOf(value = -1) }
@@ -222,7 +219,7 @@ fun MyApp(
                         IconButton(onClick = ::handleArrowBackClick) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = ""
+                                contentDescription = "Arrow pointing backwards used for navigation"
                             )
                         }
                     }
@@ -233,7 +230,7 @@ fun MyApp(
                             IconButton(onClick = { handleUserFilmDeletion(selectedFilm) }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = ""
+                                    contentDescription = "Delete trash can icon"
                                 )
                             }
                         }
@@ -242,13 +239,13 @@ fun MyApp(
                             IconButton(onClick = {/*TODO*/ }) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,
-                                    contentDescription = ""
+                                    contentDescription = "Edit icon for editing"
                                 )
                             }
                             IconButton(onClick = { pictureDeletionDialogIsOpen.value = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = ""
+                                    contentDescription = "Delete trash can icon"
                                 )
                             }
                         }
@@ -257,7 +254,7 @@ fun MyApp(
                             IconButton(onClick = { /*TODO*/ }) {
                                 Icon(
                                     imageVector = Icons.Filled.Settings,
-                                    contentDescription = ""
+                                    contentDescription = "Gear icon for settings menu"
                                 )
                             }
                         }
