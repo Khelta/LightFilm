@@ -26,6 +26,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.lightfilm.Helper.calculateSimpleEV
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream

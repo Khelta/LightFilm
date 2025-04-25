@@ -26,14 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import com.example.lightfilm.apertureStringToValue
-import com.example.lightfilm.applyISOandND
-import com.example.lightfilm.calculateEV
+import com.example.lightfilm.Helper.apertureStringToValue
+import com.example.lightfilm.Helper.applyISOandND
+import com.example.lightfilm.Helper.calculateEV
 import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
-import com.example.lightfilm.shutterSpeedStringToValue
+import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import java.io.File
 
 // TODO Autoset ISO based on selected film

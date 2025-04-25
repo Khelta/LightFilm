@@ -1,4 +1,4 @@
-package com.example.lightfilm
+package com.example.lightfilm.Helper
 
 import android.content.Context
 import android.graphics.BitmapFactory
@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.core.graphics.createBitmap
+import com.example.lightfilm.noValueString
 import java.io.File
 
 fun imageFileToBitmap(context: Context, fileName: String): ImageBitmap {

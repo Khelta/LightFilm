@@ -46,14 +46,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.lightfilm.apertureValueToString
-import com.example.lightfilm.createPlaceholderBitmap
+import com.example.lightfilm.Helper.apertureValueToString
+import com.example.lightfilm.Helper.createPlaceholderBitmap
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
-import com.example.lightfilm.imageFileToBitmap
+import com.example.lightfilm.Helper.imageFileToBitmap
 import com.example.lightfilm.noValueString
-import com.example.lightfilm.shutterSpeedValueToString
+import com.example.lightfilm.Helper.shutterSpeedValueToString
 import java.text.SimpleDateFormat
 
 @Composable

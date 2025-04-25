@@ -1,4 +1,4 @@
-package com.example.lightfilm
+package com.example.lightfilm.Helper
 
 import kotlin.math.abs
 import kotlin.math.floor

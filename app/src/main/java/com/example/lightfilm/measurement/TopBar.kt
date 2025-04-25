@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.lightfilm.CameraPreviewScreen
-import com.example.lightfilm.imageFileToBitmap
+import com.example.lightfilm.Helper.imageFileToBitmap
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
 import kotlin.math.log2

@@ -43,8 +43,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.example.lightfilm.FPrefixVisualTransformation
-import com.example.lightfilm.decimalStringClean
+import com.example.lightfilm.Helper.FPrefixVisualTransformation
+import com.example.lightfilm.Helper.decimalStringClean
 import com.example.lightfilm.onImageCaptureClick
 
 @Composable
