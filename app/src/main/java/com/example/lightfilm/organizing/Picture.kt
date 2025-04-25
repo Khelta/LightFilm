@@ -186,14 +186,14 @@ fun PictureList(
                 IconTextBlock(
                     Modifier.weight(1f),
                     Icons.Default.Science,
-                    label = "",
-                    value = "$filmType Film"
+                    label = "$filmType Film",
+                    value = ""
                 )
                 IconTextBlock(
                     Modifier.weight(1f),
                     Icons.Default.Iso,
-                    label = "ISO: ",
-                    value = iso
+                    label = "ISO: $iso",
+                    value = ""
                 )
 
             }
@@ -201,14 +201,14 @@ fun PictureList(
                 IconTextBlock(
                     Modifier.weight(1f),
                     Icons.Default.Contrast,
-                    label = "Contrast: ",
-                    value = contrast
+                    label = "Contrast: $contrast",
+                    value = ""
                 )
                 IconTextBlock(
                     Modifier.weight(1f),
                     Icons.Default.Grain,
-                    label = "Grain: ",
-                    value = grain
+                    label = "Grain: $grain",
+                    value = ""
                 )
 
             }

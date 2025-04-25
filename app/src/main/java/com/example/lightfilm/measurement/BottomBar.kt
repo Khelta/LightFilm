@@ -228,38 +228,41 @@ fun ApertureShutterSelectionDialog(
                         .fillMaxWidth()
                         .weight(1F), contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-
-                        ) {
-
-
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .weight(1F)
-                                .padding(16.dp),
-                            value = apertureValue,
-                            label = { Text("Aperture") },
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            visualTransformation = FPrefixVisualTransformation(),
-                            onValueChange = {
-                                apertureValue = decimalStringClean(apertureValue, it)
-                            },
+                    Column {
+                        Text(
+                            modifier = Modifier.padding(16.dp),
+                            text = "Input the values used for aperture and shutter speed."
                         )
+                        Row(
+                            horizontalArrangement = Arrangement.Center
+                            ) {
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .weight(1F)
+                                    .padding(16.dp),
+                                value = apertureValue,
+                                label = { Text("Aperture") },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                visualTransformation = FPrefixVisualTransformation(),
+                                onValueChange = {
+                                    apertureValue = decimalStringClean(apertureValue, it)
+                                },
+                            )
 
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .weight(1F)
-                                .padding(16.dp),
-                            value = shutterSpeedValue,
-                            label = { Text("Shutter speed") },
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            onValueChange = {
-                                shutterSpeedValue = decimalStringClean(shutterSpeedValue, it)
-                            },
-                        )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .weight(1F)
+                                    .padding(16.dp),
+                                value = shutterSpeedValue,
+                                label = { Text("Shutter speed") },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                onValueChange = {
+                                    shutterSpeedValue = decimalStringClean(shutterSpeedValue, it)
+                                },
+                            )
+                        }
                     }
                 }
 

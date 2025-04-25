@@ -193,7 +193,10 @@ fun MyApp(
                         }
 
                         Scene.PICTUREDETAILS -> {
-                            Text("Picture selected - $selectedPicture")
+                            var title =
+                                pictureViewmodel.allPictures.value?.find { it.uid == selectedPicture }?.title
+                            Text(
+                                title?.let { "$selectedPicture - $title" } ?: "$selectedPicture")
                         }
 
                         else -> {
