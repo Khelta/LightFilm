@@ -167,9 +167,6 @@ fun PictureList(
     val brand = currentFilm?.brand?.readable ?: ""
     val name = currentFilm?.name ?: ""
 
-
-    // TODO custom title
-
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),

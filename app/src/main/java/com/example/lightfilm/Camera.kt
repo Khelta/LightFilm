@@ -133,7 +133,6 @@ fun onImageCaptureClick(
             val ev = calculateSimpleEV(aperture, exposureTime)
             onEVCalculated(ev, aperture, exposureTime, iso, fileName)
 
-            // TODO Save image metadata and connect to film and picture
             image.close()
         }
     }

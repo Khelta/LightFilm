@@ -80,7 +80,6 @@ fun Measurement(
             isoSensitivityOptions[selectedIsoIndex],
             ndSensitivityOptions[value]
         )
-        // TODO Update fstoptable
     }
 
     fun handleEV(
