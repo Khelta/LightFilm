@@ -235,7 +235,7 @@ fun ApertureShutterSelectionDialog(
                         )
                         Row(
                             horizontalArrangement = Arrangement.Center
-                            ) {
+                        ) {
                             OutlinedTextField(
                                 modifier = Modifier
                                     .weight(1F)

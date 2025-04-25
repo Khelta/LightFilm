@@ -24,9 +24,9 @@ class PictureRepository(application: Application) {
         }
     }
 
-    suspend fun delete(picture: PictureModel) {
+    suspend fun delete(picture: PictureModel?) {
         withContext(Dispatchers.IO) {
-            pictureDao.delete(picture)
+            picture?.let { pictureDao.delete(picture) }
         }
     }
 }

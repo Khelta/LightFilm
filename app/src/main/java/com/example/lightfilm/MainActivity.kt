@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -112,6 +113,8 @@ fun MyApp(
     var selectedPicture: Int by rememberSaveable { mutableIntStateOf(value = -1) }
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
+    var pictureDeletionDialogIsOpen = remember { mutableStateOf(false) }
+
     fun handleUserFilmClick(userFilmId: Int) {
         selectedFilm = userFilmId
         activeScene = Scene.PICTURELIST
@@ -129,6 +132,14 @@ fun MyApp(
 
         selectedFilm = -1
         activeScene = Scene.FILMLIST
+    }
+
+    fun handlePictureDeletion(pictureId: Int) {
+        pictureViewmodel.delete(pictureViewmodel.allPictures.value?.find { it.uid == pictureId })
+        pictureDeletionDialogIsOpen.value = false
+
+        selectedPicture = -1
+        activeScene = Scene.PICTURELIST
     }
 
     fun handlePictureClick(pictureId: Int) {
@@ -233,6 +244,12 @@ fun MyApp(
                                     contentDescription = ""
                                 )
                             }
+                            IconButton(onClick = { pictureDeletionDialogIsOpen.value = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = ""
+                                )
+                            }
                         }
 
                         Scene.MEASUREMENTS -> {
@@ -297,7 +314,14 @@ fun MyApp(
                     onPictureClick = ::handlePictureClick
                 )
 
-                Scene.PICTUREDETAILS -> PictureDetails(pictureViewmodel, selectedPicture)
+                Scene.PICTUREDETAILS -> {
+                    DeletionDialog(
+                        pictureDeletionDialogIsOpen,
+                        "Do you want to delete this picture?",
+                        { handlePictureDeletion(selectedPicture) }
+                    )
+                    PictureDetails(pictureViewmodel, selectedPicture)
+                }
 
                 Scene.FILMCREATION -> FilmCreation(
                     viewmodel = filmViewmodel,

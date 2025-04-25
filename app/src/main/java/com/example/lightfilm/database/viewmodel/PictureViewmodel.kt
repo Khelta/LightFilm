@@ -25,7 +25,7 @@ class PictureViewmodel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun delete(picture: PictureModel) {
+    fun delete(picture: PictureModel?) {
         CoroutineScope(Dispatchers.Main).launch {
             repository.delete(picture)
         }
