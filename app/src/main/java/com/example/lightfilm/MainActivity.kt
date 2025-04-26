@@ -48,6 +48,8 @@ import com.example.lightfilm.organizing.PictureList
 import com.example.lightfilm.organizing.UserFilmList
 import com.example.lightfilm.ui.theme.LightFilmTheme
 
+//TODO Delete actual picture when deleting database entry
+
 class MainActivity : ComponentActivity() {
     private val pictureViewmodel: PictureViewmodel by viewModels()
     private val filmViewmodel: FilmViewmodel by viewModels()
@@ -112,6 +114,7 @@ fun MyApp(
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
     var pictureDeletionDialogIsOpen = remember { mutableStateOf(false) }
+    var filmDeletionDialogIsOpen = remember { mutableStateOf(false) }
 
     fun handleUserFilmClick(userFilmId: Int) {
         selectedFilm = userFilmId
@@ -126,7 +129,16 @@ fun MyApp(
     }
 
     fun handleUserFilmDeletion(userFilmId: Int) {
-        userFilmViewmodel.delete(userFilmViewmodel.allUserFilms.value?.find { it.uid == userFilmId })
+        val film = userFilmViewmodel.allUserFilms.value?.find { it.uid == userFilmId }
+
+        val pictures = pictureViewmodel.allPictures.value?.filter { it.userFilmId == userFilmId} ?: listOf(null)
+        for (picture in pictures){
+            pictureViewmodel.delete(picture)
+        }
+
+        userFilmViewmodel.delete(film)
+
+        filmDeletionDialogIsOpen.value = false
 
         selectedFilm = -1
         activeScene = Scene.FILMLIST
@@ -227,7 +239,7 @@ fun MyApp(
                 actions = {
                     when (activeScene) {
                         Scene.PICTURELIST -> {
-                            IconButton(onClick = { handleUserFilmDeletion(selectedFilm) }) {
+                            IconButton(onClick = { filmDeletionDialogIsOpen.value = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
                                     contentDescription = "Delete trash can icon"
@@ -304,13 +316,19 @@ fun MyApp(
                     onFilmClick = ::handleUserFilmClick
                 )
 
-                Scene.PICTURELIST -> PictureList(
-                    pictureViewmodel,
-                    filmViewmodel,
-                    userFilmViewmodel,
-                    selectedFilm,
-                    onPictureClick = ::handlePictureClick
-                )
+                Scene.PICTURELIST -> {
+                    DeletionDialog(
+                        filmDeletionDialogIsOpen,
+                        "Do you want to delete this film and all pictures in it?",
+                        { handleUserFilmDeletion(selectedFilm) })
+                    PictureList(
+                        pictureViewmodel,
+                        filmViewmodel,
+                        userFilmViewmodel,
+                        selectedFilm,
+                        onPictureClick = ::handlePictureClick
+                    )
+                }
 
                 Scene.PICTUREDETAILS -> {
                     DeletionDialog(
