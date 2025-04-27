@@ -8,13 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun DeletionDialog(dialogIsOpen: MutableState<Boolean>, text: String, onConfirmation: () -> Unit) {
     if (dialogIsOpen.value) {
         AlertDialog(
             text = {
-                Text(text)
+                Text(text, textAlign = TextAlign.Center)
             },
             icon = {
                 Icon(Icons.Default.Delete, contentDescription = null)

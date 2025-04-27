@@ -322,7 +322,7 @@ fun MyApp(
                 Scene.PICTURELIST -> {
                     DeletionDialog(
                         filmDeletionDialogIsOpen,
-                        "Do you want to delete this film and all pictures in it?",
+                        "Delete film and all photos? This action cannot be undone.",
                         { handleUserFilmDeletion(selectedFilm) })
                     PictureList(
                         pictureViewmodel,
@@ -336,7 +336,7 @@ fun MyApp(
                 Scene.PICTUREDETAILS -> {
                     DeletionDialog(
                         pictureDeletionDialogIsOpen,
-                        "Do you want to delete this picture?",
+                        "Delete photo? This action cannot be undone.",
                         { handlePictureDeletion(selectedPicture) }
                     )
                     PictureDetails(pictureViewmodel, selectedPicture)
