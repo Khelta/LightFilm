@@ -19,9 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.lightfilm.fNumbers
 import com.example.lightfilm.Helper.findClosestNumber
 import com.example.lightfilm.Helper.getShutterSpeedFromAperture
+import com.example.lightfilm.fNumbers
 import com.example.lightfilm.shutterSpeeds
 
 @Composable

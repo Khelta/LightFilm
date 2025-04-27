@@ -131,8 +131,11 @@ fun MyApp(
     fun handleUserFilmDeletion(userFilmId: Int) {
         val film = userFilmViewmodel.allUserFilms.value?.find { it.uid == userFilmId }
 
-        val pictures = pictureViewmodel.allPictures.value?.filter { it.userFilmId == userFilmId} ?: listOf(null)
-        for (picture in pictures){
+        val pictures =
+            pictureViewmodel.allPictures.value?.filter { it.userFilmId == userFilmId } ?: listOf(
+                null
+            )
+        for (picture in pictures) {
             pictureViewmodel.delete(picture)
         }
 
