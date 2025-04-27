@@ -36,20 +36,20 @@ import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
 import java.io.File
 
-// TODO Autoset ISO based on selected film
 // TODO Disable UI when preview image waits being saved or rejected
 
 @Composable
 fun Measurement(
     modifier: Modifier = Modifier,
     viewmodel: PictureViewmodel,
-    currentUserFilmId: Int
+    currentUserFilmId: Int,
+    filmIsoIndex: Int
 ) {
     var showIsoOverlay by remember { mutableStateOf(false) }
     var showNDOverlay by remember { mutableStateOf(false) }
     var apertureShutterDialogOpen = rememberSaveable { mutableStateOf(false) }
 
-    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
+    var selectedIsoIndex by rememberSaveable { mutableIntStateOf(filmIsoIndex) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
 
     var imagePath by rememberSaveable { mutableStateOf("") }

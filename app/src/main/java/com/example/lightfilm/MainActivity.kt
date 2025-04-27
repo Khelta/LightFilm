@@ -328,10 +328,18 @@ fun MyApp(
         }) { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
             when (activeScene) {
-                Scene.MEASUREMENTS -> Measurement(
-                    viewmodel = pictureViewmodel,
-                    currentUserFilmId = selectedFilm
-                )
+
+                Scene.MEASUREMENTS -> {
+                    val filmId =
+                        userFilmViewmodel.allUserFilms.value?.find { it.uid == selectedFilm }?.filmId
+                    val film = filmViewmodel.allFilms.value?.find { it.uid == filmId }
+                    val isoIndex = isoSensitivityOptions.indexOfFirst { it == (film?.iso ?: 15) }
+                    Measurement(
+                        viewmodel = pictureViewmodel,
+                        currentUserFilmId = selectedFilm,
+                        filmIsoIndex = isoIndex
+                    )
+                }
 
                 Scene.FILMLIST -> UserFilmList(
                     userFilmViewmodel,
