@@ -201,15 +201,15 @@ fun CameraCaptureButtonBar(
 @Composable
 fun ApertureShutterSelectionDialog(
     onDismissRequest: () -> Unit,
-    onConfirmation: (String, String) -> Unit,
+    onConfirmation: (String, String, String) -> Unit,
 ) {
     var apertureValue by remember { mutableStateOf("1.2") }
     var shutterSpeedValue by remember { mutableStateOf("0.25") }
+    var titleValue by remember { mutableStateOf("") }
 
     Dialog(
         onDismissRequest = { onDismissRequest() },
     ) {
-        // Draw a rectangle shape with rounded corners inside the dialog
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -232,6 +232,14 @@ fun ApertureShutterSelectionDialog(
                         Text(
                             modifier = Modifier.padding(16.dp),
                             text = "Input the values used for aperture and shutter speed."
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier
+                                .padding(16.dp),
+                            value = titleValue,
+                            label = { Text("Title") },
+                            maxLines = 1,
+                            onValueChange = { titleValue = it },
                         )
                         Row(
                             horizontalArrangement = Arrangement.Center
@@ -278,7 +286,7 @@ fun ApertureShutterSelectionDialog(
                         Text("Dismiss")
                     }
                     TextButton(
-                        onClick = { onConfirmation(apertureValue, shutterSpeedValue) },
+                        onClick = { onConfirmation(titleValue, apertureValue, shutterSpeedValue) },
                         modifier = Modifier.padding(8.dp),
                     ) {
                         Text("Confirm")
@@ -292,5 +300,5 @@ fun ApertureShutterSelectionDialog(
 @Preview()
 @Composable
 fun Test() {
-    ApertureShutterSelectionDialog({}, { _, _ -> })
+    ApertureShutterSelectionDialog({}, { _, _, _ -> })
 }

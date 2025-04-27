@@ -29,11 +29,11 @@ import androidx.compose.ui.unit.dp
 import com.example.lightfilm.Helper.apertureStringToValue
 import com.example.lightfilm.Helper.applyISOandND
 import com.example.lightfilm.Helper.calculateEV
+import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
-import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import java.io.File
 
 // TODO Autoset ISO based on selected film
@@ -112,7 +112,7 @@ fun Measurement(
         // TODO Update fstoptable
     }
 
-    fun handleImageSaving() {
+    fun handleImageSaving(title: String) {
         val picture = PictureModel(
             pathToFile = imagePath,
             internalAperture = aperture,
@@ -122,7 +122,8 @@ fun Measurement(
             selectedShutterSpeed = selectedShutterSpeedValue,
             selectedIso = isoSensitivityOptions[selectedIsoIndex],
             captureDate = System.currentTimeMillis(),
-            userFilmId = currentUserFilmId
+            userFilmId = currentUserFilmId,
+            title = if (title == "") null else title
         )
         viewmodel.insert(picture)
 
@@ -175,11 +176,11 @@ fun Measurement(
         if (apertureShutterDialogOpen) {
             ApertureShutterSelectionDialog(
                 { apertureShutterDialogOpen = false },
-                { apertureValue, shutterSpeedValue ->
+                { titleValue, apertureValue, shutterSpeedValue ->
                     selectedApertureValue = apertureStringToValue(apertureValue)
                     selectedShutterSpeedValue = shutterSpeedStringToValue(shutterSpeedValue)
                     apertureShutterDialogOpen = false
-                    handleImageSaving()
+                    handleImageSaving(titleValue)
                 })
         }
 
