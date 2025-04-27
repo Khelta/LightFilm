@@ -37,10 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.example.lightfilm.Helper.DeletionDialog
+import com.example.lightfilm.Helper.apertureStringToValue
+import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import com.example.lightfilm.database.UserFilmModel
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
+import com.example.lightfilm.measurement.ApertureShutterSelectionDialog
 import com.example.lightfilm.measurement.Measurement
 import com.example.lightfilm.organizing.FilmCreation
 import com.example.lightfilm.organizing.PictureDetails
@@ -115,6 +118,7 @@ fun MyApp(
 
     var pictureDeletionDialogIsOpen = remember { mutableStateOf(false) }
     var filmDeletionDialogIsOpen = remember { mutableStateOf(false) }
+    var pictureEditDialogIsOpen = remember { mutableStateOf(false) }
 
     fun handleUserFilmClick(userFilmId: Int) {
         selectedFilm = userFilmId
@@ -153,6 +157,22 @@ fun MyApp(
 
         selectedPicture = -1
         activeScene = Scene.PICTURELIST
+    }
+
+    fun handlePictureEdit(title: String, aperture: String, shutterSpeed: String) {
+        val picture = pictureViewmodel.allPictures.value?.find { it.uid == selectedPicture }
+
+        picture?.let {
+            pictureViewmodel.update(
+                picture.copy(
+                    title = if (title != "") title else null,
+                    selectedAperture = apertureStringToValue(aperture),
+                    selectedShutterSpeed = shutterSpeedStringToValue(shutterSpeed)
+                )
+            )
+        }
+
+        pictureEditDialogIsOpen.value = false
     }
 
     fun handlePictureClick(pictureId: Int) {
@@ -251,7 +271,7 @@ fun MyApp(
                         }
 
                         Scene.PICTUREDETAILS -> {
-                            IconButton(onClick = {/*TODO*/ }) {
+                            IconButton(onClick = { pictureEditDialogIsOpen.value = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,
                                     contentDescription = "Edit icon for editing"
@@ -334,6 +354,17 @@ fun MyApp(
                 }
 
                 Scene.PICTUREDETAILS -> {
+                    val picture =
+                        pictureViewmodel.allPictures.value?.find { it.uid == selectedPicture }
+                    ApertureShutterSelectionDialog(
+                        pictureEditDialogIsOpen,
+                        { pictureEditDialogIsOpen.value = false },
+                        ::handlePictureEdit,
+                        picture?.selectedAperture.toString(),
+                        picture?.selectedShutterSpeed.toString(),
+                        picture?.title
+
+                    )
                     DeletionDialog(
                         pictureDeletionDialogIsOpen,
                         "Delete photo? This action cannot be undone.",

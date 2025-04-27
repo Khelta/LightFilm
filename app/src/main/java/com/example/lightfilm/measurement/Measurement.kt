@@ -47,7 +47,7 @@ fun Measurement(
 ) {
     var showIsoOverlay by remember { mutableStateOf(false) }
     var showNDOverlay by remember { mutableStateOf(false) }
-    var apertureShutterDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var apertureShutterDialogOpen = rememberSaveable { mutableStateOf(false) }
 
     var selectedIsoIndex by rememberSaveable { mutableIntStateOf(15) }
     var selectedNDIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -131,7 +131,7 @@ fun Measurement(
     }
 
     fun handleApertureShutterSelectionOpening() {
-        apertureShutterDialogOpen = true
+        apertureShutterDialogOpen.value = true
     }
 
     fun handleImageReject(context: Context) {
@@ -173,13 +173,14 @@ fun Measurement(
             )
         }
 
-        if (apertureShutterDialogOpen) {
+        if (apertureShutterDialogOpen.value) {
             ApertureShutterSelectionDialog(
-                { apertureShutterDialogOpen = false },
+                apertureShutterDialogOpen,
+                { apertureShutterDialogOpen.value = false },
                 { titleValue, apertureValue, shutterSpeedValue ->
                     selectedApertureValue = apertureStringToValue(apertureValue)
                     selectedShutterSpeedValue = shutterSpeedStringToValue(shutterSpeedValue)
-                    apertureShutterDialogOpen = false
+                    apertureShutterDialogOpen.value = false
                     handleImageSaving(titleValue)
                 })
         }

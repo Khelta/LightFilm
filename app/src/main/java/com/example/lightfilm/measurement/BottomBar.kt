@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.lightfilm.Helper.FPrefixVisualTransformation
@@ -200,105 +200,118 @@ fun CameraCaptureButtonBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ApertureShutterSelectionDialog(
+    dialogIsOpen: MutableState<Boolean>,
     onDismissRequest: () -> Unit,
     onConfirmation: (String, String, String) -> Unit,
+    apertureStartingValue: String? = null,
+    shutterSpeedStartingValue: String? = null,
+    titleStartingValue: String? = null
 ) {
-    var apertureValue by remember { mutableStateOf("1.2") }
-    var shutterSpeedValue by remember { mutableStateOf("0.25") }
-    var titleValue by remember { mutableStateOf("") }
+    var apertureValue by remember {
+        mutableStateOf(apertureStartingValue?.let { apertureStartingValue } ?: "1.2")
+    }
+    var shutterSpeedValue by remember {
+        mutableStateOf(shutterSpeedStartingValue?.let { shutterSpeedStartingValue } ?: "0.25")
+    }
+    var titleValue by remember {
+        mutableStateOf(titleStartingValue?.let { titleStartingValue } ?: "")
+    }
 
-    Dialog(
-        onDismissRequest = { onDismissRequest() },
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.66f)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
+    if (dialogIsOpen.value) {
+        Dialog(
+            onDismissRequest = { onDismissRequest() },
         ) {
-            Column(
+            Card(
                 modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.66f)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
             ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1F), contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Column {
-                        Text(
-                            modifier = Modifier.padding(16.dp),
-                            text = "Input the values used for aperture and shutter speed."
-                        )
-                        OutlinedTextField(
-                            modifier = Modifier
-                                .padding(16.dp),
-                            value = titleValue,
-                            label = { Text("Title") },
-                            maxLines = 1,
-                            onValueChange = { titleValue = it },
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.Center
-                        ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1F), contentAlignment = Alignment.Center
+                    ) {
+                        Column {
+                            Text(
+                                modifier = Modifier.padding(16.dp),
+                                text = "Input the values used for aperture and shutter speed."
+                            )
                             OutlinedTextField(
                                 modifier = Modifier
-                                    .weight(1F)
                                     .padding(16.dp),
-                                value = apertureValue,
-                                label = { Text("Aperture") },
+                                value = titleValue,
+                                label = { Text("Title") },
                                 maxLines = 1,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                visualTransformation = FPrefixVisualTransformation(),
-                                onValueChange = {
-                                    apertureValue = decimalStringClean(apertureValue, it)
-                                },
+                                onValueChange = { titleValue = it },
                             )
+                            Row(
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                OutlinedTextField(
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .padding(16.dp),
+                                    value = apertureValue,
+                                    label = { Text("Aperture") },
+                                    maxLines = 1,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    visualTransformation = FPrefixVisualTransformation(),
+                                    onValueChange = {
+                                        apertureValue = decimalStringClean(apertureValue, it)
+                                    },
+                                )
 
-                            OutlinedTextField(
-                                modifier = Modifier
-                                    .weight(1F)
-                                    .padding(16.dp),
-                                value = shutterSpeedValue,
-                                label = { Text("Shutter speed") },
-                                maxLines = 1,
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                onValueChange = {
-                                    shutterSpeedValue = decimalStringClean(shutterSpeedValue, it)
-                                },
-                            )
+                                OutlinedTextField(
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .padding(16.dp),
+                                    value = shutterSpeedValue,
+                                    label = { Text("Shutter speed") },
+                                    maxLines = 1,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    onValueChange = {
+                                        shutterSpeedValue =
+                                            decimalStringClean(shutterSpeedValue, it)
+                                    },
+                                )
+                            }
                         }
                     }
-                }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = { onDismissRequest() },
-                        modifier = Modifier.padding(8.dp),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
                     ) {
-                        Text("Dismiss")
-                    }
-                    TextButton(
-                        onClick = { onConfirmation(titleValue, apertureValue, shutterSpeedValue) },
-                        modifier = Modifier.padding(8.dp),
-                    ) {
-                        Text("Confirm")
+                        TextButton(
+                            onClick = { onDismissRequest() },
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text("Dismiss")
+                        }
+                        TextButton(
+                            onClick = {
+                                onConfirmation(
+                                    titleValue,
+                                    apertureValue,
+                                    shutterSpeedValue
+                                )
+                            },
+                            modifier = Modifier.padding(8.dp),
+                        ) {
+                            Text("Confirm")
+                        }
                     }
                 }
             }
         }
     }
-}
-
-@Preview()
-@Composable
-fun Test() {
-    ApertureShutterSelectionDialog({}, { _, _, _ -> })
 }

@@ -229,7 +229,8 @@ fun PictureList(
 
 @Composable
 fun PictureDetails(viewmodel: PictureViewmodel, pictureIndex: Int) {
-    val picture = viewmodel.allPictures.value?.find { it.uid == pictureIndex }
+    val allPictures by viewmodel.allPictures.observeAsState(emptyList())
+    val picture = allPictures.find { it.uid == pictureIndex }
 
     Column(modifier = Modifier.padding(16.dp)) {
         picture?.let {
