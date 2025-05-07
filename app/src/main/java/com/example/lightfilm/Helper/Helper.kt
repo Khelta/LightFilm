@@ -11,6 +11,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.core.graphics.createBitmap
 import com.example.lightfilm.noValueString
 import java.io.File
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 fun imageFileToBitmap(context: Context, fileName: String): ImageBitmap {
     val file = File(context.filesDir, fileName)
@@ -39,19 +41,51 @@ fun apertureStringToValue(value: String?): Double? {
     return null
 }
 
-//TODO Display as fractions or seconds
 fun shutterSpeedValueToString(value: Double?): String {
-    value?.let {
-        return "$value"
+    if (value == null) return noValueString
+
+
+    return if (value < 1) {
+        val reverse = (1 / value)
+        val isWholeNumber = reverse % 1 == 0.0
+
+        val denominator = if (isWholeNumber) {
+            reverse.toInt().toString()
+        } else {
+            val df = DecimalFormat("#.#").apply {
+                roundingMode = RoundingMode.CEILING
+            }
+            df.format(reverse)
+        }
+
+        "1/$denominator"
+
+    } else {
+        val df = DecimalFormat("#.#").apply {
+            roundingMode = RoundingMode.HALF_UP
+        }
+
+        "${df.format(value)}\""
     }
-    return noValueString
 }
 
 fun shutterSpeedStringToValue(value: String?): Double? {
-    value?.let {
-        return value.toDouble()
+    val input = value?.toString() ?: return null
+
+    return when {
+        "/" in input -> {
+            val parts = input.split("/")
+            if (parts.size == 2) {
+                val numerator = parts[0].replace(",", ".").toDoubleOrNull()
+                val denominator = parts[1].replace(",", ".").toDoubleOrNull()
+                if (numerator != null && denominator != null && denominator != 0.0) {
+                    numerator / denominator
+                } else null
+            } else null
+        }
+
+        else -> input.replace(",", ".").toDoubleOrNull()
     }
-    return null
 }
 
 class FPrefixVisualTransformation : VisualTransformation {
@@ -79,25 +113,21 @@ class FPrefixVisualTransformation : VisualTransformation {
 }
 
 fun decimalStringClean(oldValue: String, newValue: String): String {
-    val filtered = newValue.filter { it.isDigit() || it == '.' || it == ',' }
+    val onlyAllowedChars = newValue.all { it.isDigit() || it == '.' || it == ',' || it == '/' }
 
-    val hasComma = filtered.contains(',')
-    val hasDot = filtered.contains('.')
+    val commaCount = newValue.count { it == ',' }
+    val dotCount = newValue.count { it == '.' }
+    val hasDecimal = (commaCount + dotCount) > 0
+    val slashCount = newValue.count { it == '/' }
 
-    val finalValue = when {
-        hasComma && hasDot -> oldValue
-        else -> {
-            val separator = if (hasDot) '.' else if (hasComma) ',' else null
-            if (separator != null) {
-                val firstIndex = filtered.indexOf(separator)
-                val cleaned = filtered.filterIndexed { index, c ->
-                    c.isDigit() || (c == separator && index == firstIndex)
-                }
-                cleaned
-            } else {
-                filtered
-            }
-        }
-    }
-    return finalValue
+    if (
+        onlyAllowedChars &&
+        commaCount <= 1 &&
+        dotCount <= 1 &&
+        slashCount <= 1 &&
+        !(slashCount > 0 && hasDecimal)
+    ) {
+        return newValue
+    } else
+        return oldValue
 }
