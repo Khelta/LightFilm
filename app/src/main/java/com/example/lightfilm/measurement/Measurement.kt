@@ -29,12 +29,12 @@ import androidx.compose.ui.unit.dp
 import com.example.lightfilm.Helper.apertureStringToValue
 import com.example.lightfilm.Helper.applyISOandND
 import com.example.lightfilm.Helper.calculateEV
+import com.example.lightfilm.Helper.deleteFile
 import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
-import java.io.File
 
 // TODO Disable UI when preview image waits being saved or rejected
 
@@ -135,8 +135,7 @@ fun Measurement(
     }
 
     fun handleImageReject(context: Context) {
-        val file = File(context.filesDir, imagePath)
-        file.delete()
+        deleteFile(imagePath, context)
         imagePath = ""
     }
 

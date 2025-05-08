@@ -17,7 +17,13 @@ import java.text.DecimalFormat
 fun imageFileToBitmap(context: Context, fileName: String): ImageBitmap {
     val file = File(context.filesDir, fileName)
     val filePath = file.absolutePath
-    val bitmap = BitmapFactory.decodeFile(filePath).asImageBitmap()
+    var bitmap: ImageBitmap
+
+    if (file.exists()) {
+        bitmap = BitmapFactory.decodeFile(filePath).asImageBitmap()
+    } else {
+        bitmap = createPlaceholderBitmap()
+    }
     return bitmap
 }
 
@@ -130,4 +136,9 @@ fun decimalStringClean(oldValue: String, newValue: String): String {
         return newValue
     } else
         return oldValue
+}
+
+fun deleteFile(pathToFile: String, context: Context) {
+    val file = File(context.filesDir, pathToFile)
+    file.delete()
 }
