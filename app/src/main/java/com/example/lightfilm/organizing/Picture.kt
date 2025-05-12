@@ -3,6 +3,7 @@ package com.example.lightfilm.organizing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Iso
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.ShutterSpeed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.lightfilm.Helper.apertureValueToString
@@ -108,25 +111,35 @@ fun Picture(
 
             val painter = rememberAsyncImagePainter(model = imageRequest)
 
-            Image(
-                painter = painter,
-                contentDescription = "User-generated preview image",
+            Box(
                 modifier = Modifier
                     .height(imageHeightDp)
                     .width(150.dp)
-                    .align(Alignment.CenterVertically)
-                    .graphicsLayer { alpha = 0.99f }
-                    .drawWithContent {
-                        drawContent()
-                        val fadeBrush = Brush.horizontalGradient(
-                            colors = listOf(Color.White, Color.Transparent),
-                            startX = 0f,
-                            endX = size.width - 0.2f * size.width
-                        )
-                        drawRect(brush = fadeBrush, blendMode = BlendMode.DstOut)
-                    },
-                contentScale = ContentScale.Crop
-            )
+                    .align(Alignment.CenterVertically),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = "User-generated preview image",
+                    modifier = Modifier
+                        .matchParentSize()
+                        .graphicsLayer { alpha = 0.99f }
+                        .drawWithContent {
+                            drawContent()
+                            val fadeBrush = Brush.horizontalGradient(
+                                colors = listOf(Color.White, Color.Transparent),
+                                startX = 0f,
+                                endX = size.width - 0.2f * size.width
+                            )
+                            drawRect(brush = fadeBrush, blendMode = BlendMode.DstOut)
+                        },
+                    contentScale = ContentScale.Crop
+                )
+                if (painter.state is AsyncImagePainter.State.Loading) {
+                    CircularProgressIndicator()
+
+                }
+            }
         }
     }
 }
@@ -250,15 +263,27 @@ fun PictureDetails(picture: PictureModel) {
     val painter = rememberAsyncImagePainter(model = imageRequest)
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Image(
-            painter = painter,
-            contentDescription = "User-generated preview image",
+        Box(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(8.dp)
-                .align(Alignment.CenterHorizontally)
                 .fillMaxHeight(0.5f),
-            contentScale = ContentScale.Fit
-        )
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painter,
+                contentDescription = "User-generated preview image",
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Fit
+            )
+
+            if (painter.state is AsyncImagePainter.State.Loading) {
+                CircularProgressIndicator()
+            }
+        }
+
         HorizontalDivider(Modifier, 2.dp)
 
 
