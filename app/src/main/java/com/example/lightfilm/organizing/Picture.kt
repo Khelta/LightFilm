@@ -46,37 +46,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.lightfilm.Helper.apertureValueToString
-import com.example.lightfilm.Helper.createPlaceholderBitmap
-import com.example.lightfilm.Helper.imageFileToBitmap
 import com.example.lightfilm.Helper.shutterSpeedValueToString
+import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
 import com.example.lightfilm.noValueString
+import java.io.File
 import java.text.SimpleDateFormat
 
 @Composable
 fun Picture(
     modifier: Modifier = Modifier,
-    viewmodel: PictureViewmodel,
-    pictureId: Int = -1,
+    picture: PictureModel,
     onPictureClick: (Int) -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val picture = viewmodel.allPictures.value?.find { it.uid == pictureId }
-    val bitmap =
-        remember(picture?.pathToFile) {
-            picture?.pathToFile?.let { imageFileToBitmap(context, it) }
-                ?: createPlaceholderBitmap()
-        }
-
     val density = LocalDensity.current
+    val context = LocalContext.current
     var columnHeightPx by remember { mutableIntStateOf(0) }
 
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier.clickable { onPictureClick(pictureId) }
+        modifier = Modifier.clickable { onPictureClick(picture.uid) }
     ) {
         Row(
             Modifier
@@ -90,17 +84,32 @@ fun Picture(
                     }
                     .padding(16.dp)
             ) {
-                val title = picture?.title?.let { " - $it" } ?: ""
-                val date = SimpleDateFormat("dd/MM/yyyy hh:mm").format(picture?.captureDate)
-                Text(text = "$pictureId" + title)
-                Text(text = "$date")
+                val title = picture.title?.let { " - $it" } ?: ""
+                val date = remember(picture.captureDate) {
+                    SimpleDateFormat("dd/MM/yyyy hh:mm").format(picture.captureDate)
+                }
+                Text(text = "${picture.uid}$title")
+                Text(text = date)
             }
 
             Column(Modifier.weight(1F)) { }
 
             val imageHeightDp = with(density) { columnHeightPx.toDp() }
+
+            val imageFile = remember(picture.pathToFile) {
+                File(context.filesDir, picture.pathToFile ?: "")
+            }
+            val imageRequest = remember(imageFile) {
+                ImageRequest.Builder(context)
+                    .data(imageFile)
+                    .crossfade(true)
+                    .build()
+            }
+
+            val painter = rememberAsyncImagePainter(model = imageRequest)
+
             Image(
-                bitmap = bitmap,
+                painter = painter,
                 contentDescription = "User-generated preview image",
                 modifier = Modifier
                     .height(imageHeightDp)
@@ -213,12 +222,11 @@ fun PictureList(
 
         HorizontalDivider(Modifier, 2.dp, MaterialTheme.colorScheme.outline)
 
+        val pictures = allPictures.value.filter { it.userFilmId == userFilmId }
         LazyColumn {
-            val pictures = allPictures.value.filter { it.userFilmId == userFilmId }
             itemsIndexed(pictures) { index, picture ->
                 Picture(
-                    viewmodel = pictureViewmodel,
-                    pictureId = picture.uid,
+                    picture = picture,
                     onPictureClick = onPictureClick
                 )
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
@@ -228,26 +236,33 @@ fun PictureList(
 }
 
 @Composable
-fun PictureDetails(viewmodel: PictureViewmodel, pictureIndex: Int) {
-    val allPictures by viewmodel.allPictures.observeAsState(emptyList())
-    val picture = allPictures.find { it.uid == pictureIndex }
+fun PictureDetails(picture: PictureModel) {
+    val context = LocalContext.current
+    val imageFile = remember(picture.pathToFile) {
+        File(context.filesDir, picture.pathToFile ?: "")
+    }
+    val imageRequest = remember(imageFile) {
+        ImageRequest.Builder(context)
+            .data(imageFile)
+            .crossfade(true)
+            .build()
+    }
+    val painter = rememberAsyncImagePainter(model = imageRequest)
 
     Column(modifier = Modifier.padding(16.dp)) {
-        picture?.let {
-            val bitmap = imageFileToBitmap(LocalContext.current, picture.pathToFile ?: "")
-            Image(
-                bitmap = bitmap,
-                contentDescription = "User-generated preview image",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxHeight(0.5f),
-                contentScale = ContentScale.Fit
-            )
-            HorizontalDivider(Modifier, 2.dp)
-        }
+        Image(
+            painter = painter,
+            contentDescription = "User-generated preview image",
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.CenterHorizontally)
+                .fillMaxHeight(0.5f),
+            contentScale = ContentScale.Fit
+        )
+        HorizontalDivider(Modifier, 2.dp)
 
-        picture?.title?.let {
+
+        picture.title?.let {
             Text(it)
             HorizontalDivider(Modifier, 2.dp)
         }
@@ -256,19 +271,19 @@ fun PictureDetails(viewmodel: PictureViewmodel, pictureIndex: Int) {
             Modifier,
             Icons.Default.Iso,
             label = "Iso: ",
-            value = picture?.selectedIso?.toString() ?: noValueString
+            value = picture.selectedIso?.toString() ?: noValueString
         )
         IconTextBlock(
             Modifier,
             Icons.Default.Camera,
             label = "Aperture: ",
-            value = apertureValueToString(picture?.selectedAperture)
+            value = apertureValueToString(picture.selectedAperture)
         )
         IconTextBlock(
             Modifier,
             Icons.Default.ShutterSpeed,
             label = "Shutter speed: ",
-            value = shutterSpeedValueToString(picture?.selectedShutterSpeed)
+            value = shutterSpeedValueToString(picture.selectedShutterSpeed)
         )
 
         HorizontalDivider(Modifier, 2.dp)
@@ -278,25 +293,25 @@ fun PictureDetails(viewmodel: PictureViewmodel, pictureIndex: Int) {
             Modifier,
             Icons.Default.Numbers,
             label = "Internal identifier: ",
-            value = picture?.uid?.toString() ?: noValueString
+            value = picture.uid.toString()
         )
         IconTextBlock(
             Modifier,
             Icons.Default.Iso,
             label = "Iso: ",
-            value = picture?.internalIso?.toString() ?: noValueString
+            value = picture.internalIso?.toString() ?: noValueString
         )
         IconTextBlock(
             Modifier,
             Icons.Default.Camera,
             label = "Aperture: ",
-            value = apertureValueToString(picture?.internalAperture)
+            value = apertureValueToString(picture.internalAperture)
         )
         IconTextBlock(
             Modifier,
             Icons.Default.ShutterSpeed,
             label = "Shutter speed: ",
-            value = shutterSpeedValueToString(picture?.internalShutterSpeed)
+            value = shutterSpeedValueToString(picture.internalShutterSpeed)
         )
     }
 }

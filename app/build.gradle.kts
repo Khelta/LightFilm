@@ -79,4 +79,7 @@ dependencies {
 
     val livedata_version = "1.7.8"
     implementation("androidx.compose.runtime:runtime-livedata:$livedata_version")
+
+    val coil_version = "2.4.0"
+    implementation("io.coil-kt:coil-compose:$coil_version")
 }

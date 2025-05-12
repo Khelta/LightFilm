@@ -374,7 +374,8 @@ fun MyApp(
                         pictureDeletionDialogIsOpen,
                         "Delete photo? This action cannot be undone.",
                         { handlePictureDeletion(selectedPicture, context) })
-                    PictureDetails(pictureViewmodel, selectedPicture)
+                    if (picture != null)
+                        PictureDetails(picture)
                 }
 
                 Scene.FILMCREATION -> FilmCreation(
