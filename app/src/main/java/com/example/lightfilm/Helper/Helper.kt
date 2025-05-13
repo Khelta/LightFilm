@@ -1,36 +1,14 @@
 package com.example.lightfilm.Helper
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.core.graphics.createBitmap
 import com.example.lightfilm.noValueString
 import java.io.File
 import java.math.RoundingMode
 import java.text.DecimalFormat
-
-fun imageFileToBitmap(context: Context, fileName: String): ImageBitmap {
-    val file = File(context.filesDir, fileName)
-    val filePath = file.absolutePath
-    var bitmap: ImageBitmap
-
-    if (file.exists()) {
-        bitmap = BitmapFactory.decodeFile(filePath).asImageBitmap()
-    } else {
-        bitmap = createPlaceholderBitmap()
-    }
-    return bitmap
-}
-
-fun createPlaceholderBitmap(): ImageBitmap {
-    val placeholder = createBitmap(1, 1)
-    return placeholder.asImageBitmap()
-}
 
 
 fun apertureValueToString(value: Double?): String {

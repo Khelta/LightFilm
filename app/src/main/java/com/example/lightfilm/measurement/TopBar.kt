@@ -23,16 +23,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.lightfilm.CameraPreviewScreen
-import com.example.lightfilm.Helper.imageFileToBitmap
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
+import java.io.File
 import kotlin.math.log2
 
 @Composable
@@ -211,14 +214,24 @@ fun CapturedImage(
     modifier: Modifier = Modifier,
     fileName: String
 ) {
+    // TODO Circle animation while waiting
     val context = LocalContext.current
-    val bitmap = imageFileToBitmap(context, fileName)
+    val imageFile = remember(fileName) {
+        File(context.filesDir, fileName)
+    }
+    val imageRequest = remember(imageFile) {
+        ImageRequest.Builder(context)
+            .data(imageFile)
+            .crossfade(true)
+            .build()
+    }
+    val painter = rememberAsyncImagePainter(model = imageRequest)
 
     Surface(
         shape = RoundedCornerShape(15),
         modifier = modifier.padding(10.dp),
         color = MaterialTheme.colorScheme.outline
     ) {
-        Image(bitmap, "")
+        Image(painter, "")
     }
 }
