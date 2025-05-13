@@ -14,37 +14,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.lightfilm.database.FilmModel
+import com.example.lightfilm.database.UserFilmModel
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
 
 @Composable
 fun UserFilm(
     modifier: Modifier = Modifier,
-    filmViewmodel: FilmViewmodel,
-    userFilmViewmodel: UserFilmViewmodel,
-    userFilmId: Int = -1,
-    onFilmClick: (Int) -> Unit = {}
+    film: FilmModel?,
+    userFilm: UserFilmModel,
+    onFilmClick: (UserFilmModel) -> Unit = {}
 ) {
-    val userFilms = userFilmViewmodel.allUserFilms.observeAsState(emptyList())
-    val films = filmViewmodel.allFilms.observeAsState(emptyList())
 
-    val userFilm = userFilms.value.find { it.uid == userFilmId }
-
-    val film = films.value.find { it.uid == userFilm?.filmId }
-    val filmTitle = userFilm?.title ?: film?.name ?: ""
-
-    Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = modifier.clickable { onFilmClick(userFilmId) }) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Titel
-            Text(
-                text = "$userFilmId - $filmTitle",
-            )
+    userFilm.filmId?.let {
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = modifier.clickable { onFilmClick(userFilm) }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Titel
+                Text(
+                    text = "${userFilm.uid} - ${film?.name}",
+                )
+            }
         }
     }
 }
@@ -53,16 +49,17 @@ fun UserFilm(
 fun UserFilmList(
     userFilmViewmodel: UserFilmViewmodel,
     filmViewmodel: FilmViewmodel,
-    onFilmClick: (Int) -> Unit = {}
+    onFilmClick: (UserFilmModel) -> Unit = {}
 ) {
     val allUserFilms = userFilmViewmodel.allUserFilms.observeAsState(emptyList())
+    // To populate
+    filmViewmodel.allFilms.observeAsState(emptyList())
 
     LazyColumn {
         itemsIndexed(allUserFilms.value) { index, userFilm ->
             UserFilm(
-                filmViewmodel = filmViewmodel,
-                userFilmViewmodel = userFilmViewmodel,
-                userFilmId = userFilm.uid,
+                film = userFilm.filmId?.let { filmViewmodel.getFilmById(userFilm.filmId) },
+                userFilm = userFilm,
                 onFilmClick = onFilmClick
             )
             HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)

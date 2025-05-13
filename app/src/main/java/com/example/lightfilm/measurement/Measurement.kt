@@ -32,6 +32,7 @@ import com.example.lightfilm.Helper.calculateEV
 import com.example.lightfilm.Helper.deleteFile
 import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import com.example.lightfilm.database.PictureModel
+import com.example.lightfilm.database.UserFilmModel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
 import com.example.lightfilm.isoSensitivityOptions
 import com.example.lightfilm.ndSensitivityOptions
@@ -42,7 +43,7 @@ import com.example.lightfilm.ndSensitivityOptions
 fun Measurement(
     modifier: Modifier = Modifier,
     viewmodel: PictureViewmodel,
-    currentUserFilmId: Int,
+    currentUserFilm: UserFilmModel,
     filmIsoIndex: Int
 ) {
     var showIsoOverlay by remember { mutableStateOf(false) }
@@ -122,7 +123,7 @@ fun Measurement(
             selectedShutterSpeed = selectedShutterSpeedValue,
             selectedIso = isoSensitivityOptions[selectedIsoIndex],
             captureDate = System.currentTimeMillis(),
-            userFilmId = currentUserFilmId,
+            userFilmId = currentUserFilm.uid,
             title = if (title == "") null else title
         )
         viewmodel.insert(picture)

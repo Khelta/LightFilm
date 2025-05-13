@@ -53,10 +53,10 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.lightfilm.Helper.apertureValueToString
 import com.example.lightfilm.Helper.shutterSpeedValueToString
+import com.example.lightfilm.database.FilmModel
 import com.example.lightfilm.database.PictureModel
-import com.example.lightfilm.database.viewmodel.FilmViewmodel
+import com.example.lightfilm.database.UserFilmModel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
-import com.example.lightfilm.database.viewmodel.UserFilmViewmodel
 import com.example.lightfilm.noValueString
 import java.io.File
 import java.text.SimpleDateFormat
@@ -65,7 +65,7 @@ import java.text.SimpleDateFormat
 fun Picture(
     modifier: Modifier = Modifier,
     picture: PictureModel,
-    onPictureClick: (Int) -> Unit = {}
+    onPictureClick: (PictureModel) -> Unit = {}
 ) {
     val density = LocalDensity.current
     val context = LocalContext.current
@@ -73,7 +73,7 @@ fun Picture(
 
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier.clickable { onPictureClick(picture.uid) }
+        modifier = Modifier.clickable { onPictureClick(picture) }
     ) {
         Row(
             Modifier
@@ -171,16 +171,11 @@ fun IconTextBlock(
 @Composable
 fun PictureList(
     pictureViewmodel: PictureViewmodel,
-    filmViewmodel: FilmViewmodel,
-    userFilmViewmodel: UserFilmViewmodel,
-    userFilmId: Int,
-    onPictureClick: (Int) -> Unit = {}
+    currentFilm: FilmModel?,
+    currentUserFilm: UserFilmModel,
+    onPictureClick: (PictureModel) -> Unit = {}
 ) {
     val allPictures = pictureViewmodel.allPictures.observeAsState(emptyList())
-    val userFilms = userFilmViewmodel.allUserFilms.observeAsState(emptyList())
-
-    val currentUserFilm = userFilms.value.find { it.uid == userFilmId }
-    val currentFilm = filmViewmodel.allFilms.value?.find { it.uid == currentUserFilm?.filmId }
 
     val filmType = currentFilm?.type?.readable ?: ""
     val contrast = currentFilm?.contrast?.readable ?: ""
@@ -235,7 +230,7 @@ fun PictureList(
 
         HorizontalDivider(Modifier, 2.dp, MaterialTheme.colorScheme.outline)
 
-        val pictures = allPictures.value.filter { it.userFilmId == userFilmId }
+        val pictures = allPictures.value.filter { it.userFilmId == currentUserFilm.uid }
         LazyColumn {
             itemsIndexed(pictures) { index, picture ->
                 Picture(

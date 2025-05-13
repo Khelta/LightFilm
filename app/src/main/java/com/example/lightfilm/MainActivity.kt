@@ -30,7 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,6 +41,8 @@ import com.example.lightfilm.Helper.DeletionDialog
 import com.example.lightfilm.Helper.apertureStringToValue
 import com.example.lightfilm.Helper.deleteFile
 import com.example.lightfilm.Helper.shutterSpeedStringToValue
+import com.example.lightfilm.database.FilmModel
+import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.UserFilmModel
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 import com.example.lightfilm.database.viewmodel.PictureViewmodel
@@ -113,8 +114,8 @@ fun MyApp(
     userFilmViewmodel: UserFilmViewmodel
 ) {
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
-    var selectedFilm by rememberSaveable { mutableIntStateOf(value = -1) }
-    var selectedPicture: Int by rememberSaveable { mutableIntStateOf(value = -1) }
+    var selectedFilm: UserFilmModel? by rememberSaveable { mutableStateOf(null) }
+    var selectedPicture: PictureModel? by rememberSaveable { mutableStateOf(null) }
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
     var pictureDeletionDialogIsOpen = remember { mutableStateOf(false) }
@@ -123,23 +124,22 @@ fun MyApp(
 
     val context = LocalContext.current
 
-    fun handleUserFilmClick(userFilmId: Int) {
-        selectedFilm = userFilmId
+    fun handleUserFilmClick(userFilm: UserFilmModel) {
+        selectedFilm = userFilm
         activeScene = Scene.PICTURELIST
     }
 
-    fun handleUserFilmCreation(filmId: Int) {
-        val userFilmInstance = UserFilmModel(filmId = filmId)
+    fun handleUserFilmCreation(film: FilmModel) {
+        val userFilmInstance = UserFilmModel(filmId = film.uid)
         userFilmViewmodel.insert(userFilmInstance)
 
         activeScene = Scene.FILMLIST
     }
 
-    fun handleUserFilmDeletion(userFilmId: Int) {
-        val film = userFilmViewmodel.allUserFilms.value?.find { it.uid == userFilmId }
+    fun handleUserFilmDeletion(userFilm: UserFilmModel) {
 
         val pictures =
-            pictureViewmodel.allPictures.value?.filter { it.userFilmId == userFilmId } ?: listOf(
+            pictureViewmodel.allPictures.value?.filter { it.userFilmId == userFilm.uid } ?: listOf(
                 null
             )
         for (picture in pictures) {
@@ -149,32 +149,29 @@ fun MyApp(
             }
         }
 
-        userFilmViewmodel.delete(film)
+        userFilmViewmodel.delete(userFilm)
 
         filmDeletionDialogIsOpen.value = false
 
-        selectedFilm = -1
+        selectedFilm = null
         activeScene = Scene.FILMLIST
     }
 
-    fun handlePictureDeletion(pictureId: Int, context: Context) {
-        var picture = pictureViewmodel.allPictures.value?.find { it.uid == pictureId }
+    fun handlePictureDeletion(picture: PictureModel, context: Context) {
         pictureViewmodel.delete(picture)
-        picture?.pathToFile?.let {
+        picture.pathToFile?.let {
             deleteFile(it, context)
         }
         pictureDeletionDialogIsOpen.value = false
 
-        selectedPicture = -1
+        selectedPicture = null
         activeScene = Scene.PICTURELIST
     }
 
     fun handlePictureEdit(title: String, aperture: String, shutterSpeed: String) {
-        val picture = pictureViewmodel.allPictures.value?.find { it.uid == selectedPicture }
-
-        picture?.let {
+        selectedPicture?.let { selectedPicture ->
             pictureViewmodel.update(
-                picture.copy(
+                selectedPicture.copy(
                     title = if (title != "") title else null,
                     selectedAperture = apertureStringToValue(aperture),
                     selectedShutterSpeed = shutterSpeedStringToValue(shutterSpeed)
@@ -185,8 +182,8 @@ fun MyApp(
         pictureEditDialogIsOpen.value = false
     }
 
-    fun handlePictureClick(pictureId: Int) {
-        selectedPicture = pictureId
+    fun handlePictureClick(picture: PictureModel) {
+        selectedPicture = picture
         activeScene = Scene.PICTUREDETAILS
     }
 
@@ -206,12 +203,12 @@ fun MyApp(
             }
 
             Scene.PICTURELIST -> {
-                selectedFilm = -1
+                selectedFilm = null
                 activeScene = Scene.FILMLIST
             }
 
             Scene.PICTUREDETAILS -> {
-                selectedPicture = -1
+                selectedPicture = null
                 activeScene = Scene.PICTURELIST
             }
         }
@@ -235,16 +232,16 @@ fun MyApp(
                     }
 
                     Scene.PICTURELIST -> {
-                        val filmId =
-                            userFilmViewmodel.allUserFilms.value?.find { it.uid == selectedFilm }?.filmId
+                        val filmId = selectedFilm?.filmId
                         val filmName = filmViewmodel.allFilms.value?.find { it.uid == filmId }?.name
-                        Text("$selectedFilm - $filmName")
+                        val userFilmId = selectedFilm?.uid
+                        Text("$userFilmId - $filmName")
                     }
 
                     Scene.PICTUREDETAILS -> {
-                        var title =
-                            pictureViewmodel.allPictures.value?.find { it.uid == selectedPicture }?.title
-                        Text(title?.let { "$selectedPicture - $title" } ?: "$selectedPicture")
+                        var title = selectedPicture?.title
+                        var id = selectedPicture?.uid
+                        Text(title?.let { "$id - $title" } ?: "$id")
                     }
 
                     else -> {
@@ -329,15 +326,17 @@ fun MyApp(
             when (activeScene) {
 
                 Scene.MEASUREMENTS -> {
-                    val filmId =
-                        userFilmViewmodel.allUserFilms.value?.find { it.uid == selectedFilm }?.filmId
-                    val film = filmViewmodel.allFilms.value?.find { it.uid == filmId }
-                    val isoIndex = isoSensitivityOptions.indexOfFirst { it == (film?.iso ?: 15) }
-                    Measurement(
-                        viewmodel = pictureViewmodel,
-                        currentUserFilmId = selectedFilm,
-                        filmIsoIndex = isoIndex
-                    )
+                    selectedFilm?.let { selectedFilm ->
+                        val filmId = selectedFilm.filmId
+                        val film = filmViewmodel.allFilms.value?.find { it.uid == filmId }
+                        val isoIndex =
+                            isoSensitivityOptions.indexOfFirst { it == (film?.iso ?: 15) }
+                        Measurement(
+                            viewmodel = pictureViewmodel,
+                            currentUserFilm = selectedFilm,
+                            filmIsoIndex = isoIndex
+                        )
+                    }
                 }
 
                 Scene.FILMLIST -> UserFilmList(
@@ -345,43 +344,47 @@ fun MyApp(
                 )
 
                 Scene.PICTURELIST -> {
-                    DeletionDialog(
-                        filmDeletionDialogIsOpen,
-                        "Delete film and all photos? This action cannot be undone.",
-                        { handleUserFilmDeletion(selectedFilm) })
-                    PictureList(
-                        pictureViewmodel,
-                        filmViewmodel,
-                        userFilmViewmodel,
-                        selectedFilm,
-                        onPictureClick = ::handlePictureClick
-                    )
+                    selectedFilm?.let { selectedFilm ->
+                        DeletionDialog(
+                            filmDeletionDialogIsOpen,
+                            "Delete film and all photos? This action cannot be undone.",
+                            { handleUserFilmDeletion(selectedFilm) })
+                        PictureList(
+                            pictureViewmodel,
+                            filmViewmodel.getFilmById(selectedFilm.filmId),
+                            selectedFilm,
+                            onPictureClick = ::handlePictureClick
+                        )
+                    }
                 }
 
                 Scene.PICTUREDETAILS -> {
-                    val picture =
-                        pictureViewmodel.allPictures.value?.find { it.uid == selectedPicture }
-                    ApertureShutterSelectionDialog(
-                        pictureEditDialogIsOpen,
-                        { pictureEditDialogIsOpen.value = false },
-                        ::handlePictureEdit,
-                        picture?.selectedAperture.toString(),
-                        picture?.selectedShutterSpeed.toString(),
-                        picture?.title
+                    selectedPicture?.let { selectedPicture ->
+                        ApertureShutterSelectionDialog(
+                            pictureEditDialogIsOpen,
+                            { pictureEditDialogIsOpen.value = false },
+                            ::handlePictureEdit,
+                            selectedPicture.selectedAperture.toString(),
+                            selectedPicture.selectedShutterSpeed.toString(),
+                            selectedPicture.title
 
-                    )
-                    DeletionDialog(
-                        pictureDeletionDialogIsOpen,
-                        "Delete photo? This action cannot be undone.",
-                        { handlePictureDeletion(selectedPicture, context) })
-                    if (picture != null)
-                        PictureDetails(picture)
+                        )
+
+                        DeletionDialog(
+                            pictureDeletionDialogIsOpen,
+                            "Delete photo? This action cannot be undone.",
+                            { handlePictureDeletion(selectedPicture, context) })
+
+                        PictureDetails(selectedPicture)
+
+                    }
                 }
 
                 Scene.FILMCREATION -> FilmCreation(
                     viewmodel = filmViewmodel, onFilmSelected = ::handleUserFilmCreation
                 )
             }
+
         }
     }
 }

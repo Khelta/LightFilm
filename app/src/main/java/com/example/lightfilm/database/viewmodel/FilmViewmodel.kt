@@ -30,4 +30,8 @@ class FilmViewmodel(application: Application) : AndroidViewModel(application) {
             repository.delete(film)
         }
     }
+
+    fun getFilmById(id: Int?): FilmModel? {
+        return allFilms.value?.find { it.uid == id }
+    }
 }

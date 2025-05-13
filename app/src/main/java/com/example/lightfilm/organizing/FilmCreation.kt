@@ -18,13 +18,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.lightfilm.database.FilmModel
 import com.example.lightfilm.database.viewmodel.FilmViewmodel
 
 @Composable
 fun FilmCreation(
     modifier: Modifier = Modifier,
     viewmodel: FilmViewmodel,
-    onFilmSelected: (Int) -> Unit
+    onFilmSelected: (FilmModel) -> Unit
 ) {
     val films = viewmodel.allFilms.observeAsState(emptyList())
 
@@ -38,20 +39,25 @@ fun FilmCreation(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(films.value) { film ->
-            FilmItem(filmId = film.uid, filmName = film.name, onClick = onFilmSelected)
+            FilmItem(film = film, filmName = film.name, onClick = onFilmSelected)
         }
     }
 }
 
 @Composable
-fun FilmItem(modifier: Modifier = Modifier, filmId: Int, filmName: String, onClick: (Int) -> Unit) {
+fun FilmItem(
+    modifier: Modifier = Modifier,
+    film: FilmModel,
+    filmName: String,
+    onClick: (FilmModel) -> Unit
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1f)
             .padding(4.dp),
         shape = MaterialTheme.shapes.medium,
-        onClick = { onClick(filmId) }
+        onClick = { onClick(film) }
     ) {
         Box(
             modifier = Modifier
