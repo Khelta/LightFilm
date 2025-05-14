@@ -38,9 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.example.lightfilm.Helper.DeletionDialog
-import com.example.lightfilm.Helper.apertureStringToValue
-import com.example.lightfilm.Helper.deleteFile
-import com.example.lightfilm.Helper.shutterSpeedStringToValue
 import com.example.lightfilm.database.FilmModel
 import com.example.lightfilm.database.PictureModel
 import com.example.lightfilm.database.UserFilmModel
@@ -114,8 +111,8 @@ fun MyApp(
     userFilmViewmodel: UserFilmViewmodel
 ) {
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
-    var selectedFilm: UserFilmModel? by rememberSaveable { mutableStateOf(null) }
-    var selectedPicture: PictureModel? by rememberSaveable { mutableStateOf(null) }
+    var selectedFilm = userFilmViewmodel.currentUserFilm
+    var selectedPicture = pictureViewmodel.currentPicture
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
     var pictureDeletionDialogIsOpen = remember { mutableStateOf(false) }
@@ -130,55 +127,24 @@ fun MyApp(
     }
 
     fun handleUserFilmCreation(film: FilmModel) {
-        val userFilmInstance = UserFilmModel(filmId = film.uid)
-        userFilmViewmodel.insert(userFilmInstance)
-
+        userFilmViewmodel.insert(UserFilmModel(filmId = film.uid))
         activeScene = Scene.FILMLIST
     }
 
     fun handleUserFilmDeletion(userFilm: UserFilmModel) {
-
-        val pictures =
-            pictureViewmodel.allPictures.value?.filter { it.userFilmId == userFilm.uid } ?: listOf(
-                null
-            )
-        for (picture in pictures) {
-            pictureViewmodel.delete(picture)
-            picture?.pathToFile?.let {
-                deleteFile(it, context)
-            }
-        }
-
-        userFilmViewmodel.delete(userFilm)
-
+        userFilmViewmodel.delete(userFilm, pictureViewmodel, context)
         filmDeletionDialogIsOpen.value = false
-
-        selectedFilm = null
         activeScene = Scene.FILMLIST
     }
 
     fun handlePictureDeletion(picture: PictureModel, context: Context) {
-        pictureViewmodel.delete(picture)
-        picture.pathToFile?.let {
-            deleteFile(it, context)
-        }
+        pictureViewmodel.delete(picture, context)
         pictureDeletionDialogIsOpen.value = false
-
-        selectedPicture = null
         activeScene = Scene.PICTURELIST
     }
 
     fun handlePictureEdit(title: String, aperture: String, shutterSpeed: String) {
-        selectedPicture?.let { selectedPicture ->
-            pictureViewmodel.update(
-                selectedPicture.copy(
-                    title = if (title != "") title else null,
-                    selectedAperture = apertureStringToValue(aperture),
-                    selectedShutterSpeed = shutterSpeedStringToValue(shutterSpeed)
-                )
-            )
-        }
-
+        pictureViewmodel.edit(title, aperture, shutterSpeed)
         pictureEditDialogIsOpen.value = false
     }
 

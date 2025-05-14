@@ -29,4 +29,12 @@ class PictureRepository(application: Application) {
             picture?.let { pictureDao.delete(picture) }
         }
     }
+
+    suspend fun getNextPicture(picture: PictureModel): PictureModel? {
+        return pictureDao.getNextPicture(picture.userFilmId, picture.uid)
+    }
+
+    suspend fun getPreviousPicture(picture: PictureModel): PictureModel? {
+        return pictureDao.getPreviousPicture(picture.userFilmId, picture.uid)
+    }
 }
