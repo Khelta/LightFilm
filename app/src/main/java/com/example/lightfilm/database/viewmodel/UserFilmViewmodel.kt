@@ -51,4 +51,8 @@ class UserFilmViewmodel(application: Application) : AndroidViewModel(application
             repository.delete(userFilm)
         }
     }
+
+    fun setUserFilm(userFilm: UserFilmModel?) {
+        currentUserFilm = userFilm
+    }
 }

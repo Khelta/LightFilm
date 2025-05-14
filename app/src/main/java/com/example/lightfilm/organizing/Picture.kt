@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowLeft
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Grain
@@ -244,7 +246,7 @@ fun PictureList(
 }
 
 @Composable
-fun PictureDetails(picture: PictureModel) {
+fun PictureDetails(picture: PictureModel, onClickNext: () -> Unit, onClickPrevious: () -> Unit) {
     val context = LocalContext.current
     val imageFile = remember(picture.pathToFile) {
         File(context.filesDir, picture.pathToFile ?: "")
@@ -258,24 +260,49 @@ fun PictureDetails(picture: PictureModel) {
     val painter = rememberAsyncImagePainter(model = imageRequest)
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .fillMaxHeight(0.5f),
-            contentAlignment = Alignment.Center
+        Row(
+            Modifier
+                .fillMaxHeight(0.5f)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Image(
-                painter = painter,
-                contentDescription = "User-generated preview image",
-                modifier = Modifier
+            Column(
+                Modifier
+                    .width(40.dp)
                     .fillMaxHeight()
-                    .align(Alignment.Center),
-                contentScale = ContentScale.Fit
-            )
-
-            if (painter.state is AsyncImagePainter.State.Loading) {
-                CircularProgressIndicator()
+                    .clickable(onClick = onClickPrevious),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ArrowLeft, "")
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = "User-generated preview image",
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .align(Alignment.Center),
+                    contentScale = ContentScale.Fit
+                )
+                if (painter.state is AsyncImagePainter.State.Loading) {
+                    CircularProgressIndicator()
+                }
+            }
+            Column(
+                Modifier
+                    .width(40.dp)
+                    .fillMaxHeight()
+                    .clickable(onClick = onClickNext),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ArrowRight, "")
             }
         }
 

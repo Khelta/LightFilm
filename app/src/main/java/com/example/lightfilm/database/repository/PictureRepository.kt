@@ -31,10 +31,14 @@ class PictureRepository(application: Application) {
     }
 
     suspend fun getNextPicture(picture: PictureModel): PictureModel? {
-        return pictureDao.getNextPicture(picture.userFilmId, picture.uid)
+        return withContext(Dispatchers.IO) {
+            pictureDao.getNextPicture(picture.userFilmId, picture.uid)
+        }
     }
 
     suspend fun getPreviousPicture(picture: PictureModel): PictureModel? {
-        return pictureDao.getPreviousPicture(picture.userFilmId, picture.uid)
+        return withContext(Dispatchers.IO) {
+            pictureDao.getPreviousPicture(picture.userFilmId, picture.uid)
+        }
     }
 }

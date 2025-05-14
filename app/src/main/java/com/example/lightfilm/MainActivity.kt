@@ -111,8 +111,8 @@ fun MyApp(
     userFilmViewmodel: UserFilmViewmodel
 ) {
     var showMeasurement by rememberSaveable { mutableStateOf(value = false) }
-    var selectedFilm = userFilmViewmodel.currentUserFilm
-    var selectedPicture = pictureViewmodel.currentPicture
+    val selectedFilm = userFilmViewmodel.currentUserFilm
+    val selectedPicture = pictureViewmodel.currentPicture
     var activeScene by rememberSaveable { mutableStateOf(value = Scene.FILMLIST) }
 
     var pictureDeletionDialogIsOpen = remember { mutableStateOf(false) }
@@ -122,7 +122,7 @@ fun MyApp(
     val context = LocalContext.current
 
     fun handleUserFilmClick(userFilm: UserFilmModel) {
-        selectedFilm = userFilm
+        userFilmViewmodel.setUserFilm(userFilm)
         activeScene = Scene.PICTURELIST
     }
 
@@ -149,7 +149,7 @@ fun MyApp(
     }
 
     fun handlePictureClick(picture: PictureModel) {
-        selectedPicture = picture
+        pictureViewmodel.setPicture(picture)
         activeScene = Scene.PICTUREDETAILS
     }
 
@@ -169,12 +169,12 @@ fun MyApp(
             }
 
             Scene.PICTURELIST -> {
-                selectedFilm = null
+                userFilmViewmodel.setUserFilm(null)
                 activeScene = Scene.FILMLIST
             }
 
             Scene.PICTUREDETAILS -> {
-                selectedPicture = null
+                pictureViewmodel.setPicture(null)
                 activeScene = Scene.PICTURELIST
             }
         }
@@ -186,108 +186,116 @@ fun MyApp(
         else activity?.finish()
     }
 
-    Scaffold(topBar = {
-        TopAppBar(
-            colors = topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary,
-            ), title = {
-                when (activeScene) {
-                    Scene.FILMLIST -> {
-                        Text("LightFilm")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    when (activeScene) {
+                        Scene.FILMLIST -> {
+                            Text("LightFilm")
+                        }
+
+                        Scene.PICTURELIST -> {
+                            val filmId = selectedFilm?.filmId
+                            val filmName =
+                                filmViewmodel.allFilms.value?.find { it.uid == filmId }?.name
+                            val userFilmId = selectedFilm?.uid
+                            Text("$userFilmId - $filmName")
+                        }
+
+                        Scene.PICTUREDETAILS -> {
+                            var title = selectedPicture?.title
+                            var id = selectedPicture?.uid
+                            Text(title?.let { "$id - $title" } ?: "$id")
+                        }
+
+                        else -> {
+
+                        }
                     }
 
-                    Scene.PICTURELIST -> {
-                        val filmId = selectedFilm?.filmId
-                        val filmName = filmViewmodel.allFilms.value?.find { it.uid == filmId }?.name
-                        val userFilmId = selectedFilm?.uid
-                        Text("$userFilmId - $filmName")
+                },
+                navigationIcon = {
+                    if (activeScene != Scene.FILMLIST) {
+                        IconButton(onClick = ::handleArrowBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Arrow pointing backwards used for navigation"
+                            )
+                        }
                     }
+                },
+                actions = {
+                    when (activeScene) {
+                        Scene.PICTURELIST -> {
+                            IconButton(onClick = { filmDeletionDialogIsOpen.value = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete trash can icon"
+                                )
+                            }
+                        }
 
-                    Scene.PICTUREDETAILS -> {
-                        var title = selectedPicture?.title
-                        var id = selectedPicture?.uid
-                        Text(title?.let { "$id - $title" } ?: "$id")
-                    }
+                        Scene.PICTUREDETAILS -> {
+                            IconButton(onClick = { pictureEditDialogIsOpen.value = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Edit icon for editing"
+                                )
+                            }
+                            IconButton(onClick = { pictureDeletionDialogIsOpen.value = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete trash can icon"
+                                )
+                            }
+                        }
 
-                    else -> {
+                        Scene.MEASUREMENTS -> {
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = "Gear icon for settings menu"
+                                )
+                            }
+                        }
 
+                        else -> {}
                     }
                 }
-
-            }, navigationIcon = {
-                if (activeScene != Scene.FILMLIST) {
-                    IconButton(onClick = ::handleArrowBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Arrow pointing backwards used for navigation"
-                        )
-                    }
-                }
-            }, actions = {
-                when (activeScene) {
-                    Scene.PICTURELIST -> {
-                        IconButton(onClick = { filmDeletionDialogIsOpen.value = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "Delete trash can icon"
-                            )
-                        }
-                    }
-
-                    Scene.PICTUREDETAILS -> {
-                        IconButton(onClick = { pictureEditDialogIsOpen.value = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = "Edit icon for editing"
-                            )
-                        }
-                        IconButton(onClick = { pictureDeletionDialogIsOpen.value = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = "Delete trash can icon"
-                            )
-                        }
-                    }
-
-                    Scene.MEASUREMENTS -> {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Settings,
-                                contentDescription = "Gear icon for settings menu"
-                            )
-                        }
-                    }
-
-                    else -> {}
-                }
-            })
-    }, floatingActionButton = {
-        if (activeScene in listOf<Scene>(
-                Scene.FILMLIST,
-                Scene.PICTURELIST,
             )
-        ) {
-            FloatingActionButton(onClick = {
-                when (activeScene) {
+        },
+        floatingActionButton = {
+            if (activeScene in listOf<Scene>(
+                    Scene.FILMLIST,
+                    Scene.PICTURELIST,
+                )
+            ) {
+                FloatingActionButton(onClick = {
+                    when (activeScene) {
 
-                    Scene.FILMLIST -> activeScene = Scene.FILMCREATION
+                        Scene.FILMLIST -> activeScene = Scene.FILMCREATION
 
-                    Scene.PICTURELIST -> {
-                        showMeasurement = true
-                        activeScene = Scene.MEASUREMENTS
+                        Scene.PICTURELIST -> {
+                            showMeasurement = true
+                            activeScene = Scene.MEASUREMENTS
+                        }
+
+                        else -> {}
                     }
 
-                    else -> {}
-                }
-
-            }) {
-                when (activeScene) {
-                    else -> Icon(Icons.Default.Add, contentDescription = "Add")
+                }) {
+                    when (activeScene) {
+                        else -> Icon(Icons.Default.Add, contentDescription = "Add")
+                    }
                 }
             }
-        }
-    }) { innerPadding ->
+        })
+    { innerPadding ->
         Surface(modifier = Modifier.padding(innerPadding)) {
             when (activeScene) {
 
@@ -341,8 +349,11 @@ fun MyApp(
                             "Delete photo? This action cannot be undone.",
                             { handlePictureDeletion(selectedPicture, context) })
 
-                        PictureDetails(selectedPicture)
-
+                        PictureDetails(
+                            selectedPicture,
+                            { pictureViewmodel.getNextPicture(selectedPicture) },
+                            { pictureViewmodel.getPreviousPicture(selectedPicture) }
+                        )
                     }
                 }
 
