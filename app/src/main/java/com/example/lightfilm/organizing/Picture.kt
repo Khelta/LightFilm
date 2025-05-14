@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import coil.size.Size
 import com.example.lightfilm.Helper.apertureValueToString
 import com.example.lightfilm.Helper.shutterSpeedValueToString
 import com.example.lightfilm.database.FilmModel
@@ -254,6 +255,7 @@ fun PictureDetails(picture: PictureModel, onClickNext: () -> Unit, onClickPrevio
     val imageRequest = remember(imageFile) {
         ImageRequest.Builder(context)
             .data(imageFile)
+            .size(Size.ORIGINAL)
             .crossfade(true)
             .build()
     }
