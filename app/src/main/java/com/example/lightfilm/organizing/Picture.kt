@@ -2,6 +2,8 @@ package com.example.lightfilm.organizing
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitHorizontalDragOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -265,7 +268,25 @@ fun PictureDetails(picture: PictureModel, onClickNext: () -> Unit, onClickPrevio
         Row(
             Modifier
                 .fillMaxHeight(0.5f)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    while (true) {
+                        awaitPointerEventScope {
+                            val down = awaitFirstDown()
+                            val drag = awaitHorizontalDragOrCancellation(down.id)
+                            if (drag != null) {
+                                val delta = drag.position.x - down.position.x
+                                if (kotlin.math.abs(delta) > 5) {
+                                    if (delta > 0) {
+                                        onClickPrevious()
+                                    } else {
+                                        onClickNext()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(

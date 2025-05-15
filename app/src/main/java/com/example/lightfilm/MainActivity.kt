@@ -351,8 +351,8 @@ fun MyApp(
 
                         PictureDetails(
                             selectedPicture,
-                            { pictureViewmodel.getNextPicture(selectedPicture) },
-                            { pictureViewmodel.getPreviousPicture(selectedPicture) }
+                            { pictureViewmodel.getNextPicture() },
+                            { pictureViewmodel.getPreviousPicture() }
                         )
                     }
                 }

@@ -55,20 +55,24 @@ class PictureViewmodel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun getNextPicture(picture: PictureModel) {
+    fun getNextPicture() {
         CoroutineScope(Dispatchers.Main).launch {
-            val nextPicture = repository.getNextPicture(picture)
-            nextPicture?.let {
-                currentPicture = nextPicture
+            currentPicture?.let { picture ->
+                val nextPicture = repository.getNextPicture(picture)
+                nextPicture?.let {
+                    currentPicture = nextPicture
+                }
             }
         }
     }
 
-    fun getPreviousPicture(picture: PictureModel) {
+    fun getPreviousPicture() {
         CoroutineScope(Dispatchers.Main).launch {
-            val previousPicture = repository.getPreviousPicture(picture)
-            previousPicture?.let {
-                currentPicture = previousPicture
+            currentPicture?.let { picture ->
+                val previousPicture = repository.getPreviousPicture(picture)
+                previousPicture?.let {
+                    currentPicture = previousPicture
+                }
             }
         }
     }
