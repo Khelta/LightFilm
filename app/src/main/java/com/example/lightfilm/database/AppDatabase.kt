@@ -15,11 +15,12 @@ import com.example.lightfilm.database.dao.PictureDao
 import com.example.lightfilm.database.dao.UserFilmDao
 
 @Database(
+    version = 2,
     entities = [
         PictureModel::class,
         FilmModel::class,
         UserFilmModel::class,
-    ], version = 1
+    ],
 )
 @TypeConverters(
     FilmTypeConverter::class,
@@ -42,7 +43,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "cool-database-name.db"
-                ).createFromAsset("database/prepackaged.db")
+                ).createFromAsset(
+                    "database/prepackaged.db"
+                ).addMigrations(MIGRATION_1_2)
                     .build()
                 INSTANCE = instance
                 instance

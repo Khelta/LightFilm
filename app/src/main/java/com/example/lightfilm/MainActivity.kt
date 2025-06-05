@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.RotateLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -241,6 +242,12 @@ fun MyApp(
                         }
 
                         Scene.PICTUREDETAILS -> {
+                            IconButton(onClick = { pictureViewmodel.rotatePicture() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.RotateLeft,
+                                    contentDescription = "Rotate icon"
+                                )
+                            }
                             IconButton(onClick = { pictureEditDialogIsOpen.value = true }) {
                                 Icon(
                                     imageVector = Icons.Filled.Edit,

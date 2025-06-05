@@ -57,6 +57,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
+import com.example.lightfilm.Helper.RotateTransformation
 import com.example.lightfilm.Helper.apertureValueToString
 import com.example.lightfilm.Helper.shutterSpeedValueToString
 import com.example.lightfilm.database.FilmModel
@@ -255,11 +256,12 @@ fun PictureDetails(picture: PictureModel, onClickNext: () -> Unit, onClickPrevio
     val imageFile = remember(picture.pathToFile) {
         File(context.filesDir, picture.pathToFile ?: "")
     }
-    val imageRequest = remember(imageFile) {
+    val imageRequest = remember(picture.rotation, imageFile) {
         ImageRequest.Builder(context)
             .data(imageFile)
             .size(Size.ORIGINAL)
             .crossfade(true)
+            .transformations(RotateTransformation(picture.rotation * 90f))
             .build()
     }
     val painter = rememberAsyncImagePainter(model = imageRequest)

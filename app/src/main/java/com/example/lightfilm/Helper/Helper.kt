@@ -1,10 +1,14 @@
 package com.example.lightfilm.Helper
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import coil.size.Size
+import coil.transform.Transformation
 import com.example.lightfilm.noValueString
 import java.io.File
 import java.math.RoundingMode
@@ -119,4 +123,16 @@ fun decimalStringClean(oldValue: String, newValue: String): String {
 fun deleteFile(pathToFile: String, context: Context) {
     val file = File(context.filesDir, pathToFile)
     file.delete()
+}
+
+
+class RotateTransformation(private val degrees: Float) : Transformation {
+
+    override val cacheKey: String
+        get() = "${RotateTransformation::class.java.name}-$degrees"
+
+    override suspend fun transform(input: Bitmap, size: Size): Bitmap {
+        val matrix = Matrix().apply { postRotate(degrees) }
+        return Bitmap.createBitmap(input, 0, 0, input.width, input.height, matrix, true)
+    }
 }

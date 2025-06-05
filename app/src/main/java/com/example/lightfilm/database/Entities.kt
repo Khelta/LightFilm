@@ -21,7 +21,8 @@ data class PictureModel(
     @ColumnInfo(name = "internal_iso") val internalIso: Int? = null,
     @ColumnInfo(name = "selected_aperture") val selectedAperture: Double? = null,
     @ColumnInfo(name = "selected_shutterspeed") val selectedShutterSpeed: Double? = null,
-    @ColumnInfo(name = "selected_iso") val selectedIso: Int? = null
+    @ColumnInfo(name = "selected_iso") val selectedIso: Int? = null,
+    @ColumnInfo(name = "rotation") val rotation: Int = 0,
 )
 
 @Entity(tableName = "user_film")
