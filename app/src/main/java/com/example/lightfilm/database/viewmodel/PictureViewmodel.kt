@@ -82,7 +82,7 @@ class PictureViewmodel(application: Application) : AndroidViewModel(application)
     }
 
     fun rotatePicture() {
-        currentPicture = currentPicture?.let{currentPicture ->
+        currentPicture = currentPicture?.let { currentPicture ->
             val pic = currentPicture.copy(rotation = (currentPicture.rotation - 1) % 4)
             this.update(pic)
             pic

@@ -113,6 +113,7 @@ fun Picture(
                 ImageRequest.Builder(context)
                     .data(imageFile)
                     .crossfade(true)
+                    .transformations(RotateTransformation(picture.rotation * 90f))
                     .build()
             }
 
